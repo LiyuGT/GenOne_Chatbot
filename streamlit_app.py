@@ -151,7 +151,7 @@ if user_query := st.chat_input("What opportunities are you looking for?"):
         with st.chat_message("assistant"):
             st.markdown(result)
 
-    except openai.error.APIError as e:
+    except openai.error.OpenAIError as e:
         error_message = f"API error occurred: {str(e)}"
         st.session_state.messages.append({"role": "assistant", "content": error_message})
         with st.chat_message("assistant"):

@@ -49,7 +49,7 @@ if user_query := st.chat_input("What opportunities are you looking for?"):
     st.session_state.messages.append({"role": "user", "content": user_query})
     with st.chat_message("user"):
         st.markdown(user_query)
-        
+
     # Create a GPT-4 prompt with the data and user query
     prompt = f"""
     # Objective
@@ -132,13 +132,6 @@ if user_query := st.chat_input("What opportunities are you looking for?"):
     Iterative Improvement: Adjust logic and instructions to enhance reliability and user satisfaction.
 
     """
-
-    # Verify OpenAI API key
-    try:
-        openai.Engine.list()  # Test the API key by listing available engines
-    except Exception:
-        st.error("Invalid OpenAI API Key. Please check and try again.")
-        st.stop()
 
     # Generate Chat Response
     try:

@@ -3,8 +3,6 @@ import pandas as pd
 import openai
 import os
 
-
-
 # Title and description
 st.title("💬 Opportunity Chatbot")
 st.write(
@@ -54,7 +52,7 @@ if user_query := st.chat_input("What opportunities are you looking for?"):
 
     # Create a GPT-4 prompt with the data and user query
     prompt = f"""
-    #Objective
+    # Objective
     The chatbot is designed to assist students in discovering meaningful and relevant summer opportunities. It should provide:
     Accurate Information: Use only the designated table of data on summer opportunities.
     Query Support: Help users effectively search for specific records based on their preferences.
@@ -72,7 +70,7 @@ if user_query := st.chat_input("What opportunities are you looking for?"):
     1–2 matches: List individually.
     3+ matches: Present in a neat, tabular format.
 
-    #Style Guide
+    # Style Guide
     Tone
     Friendly and professional.
     Engaging yet respectful.
@@ -84,7 +82,7 @@ if user_query := st.chat_input("What opportunities are you looking for?"):
     “Here’s what I found for you! 🌟”
     “Great question! Let me check the data for you… 😎”
 
-    #Query Rules
+    # Query Rules
     Always Query the Data Source
     Every user question must trigger a query to the data table, even if the answer seems obvious.
     Responses must be strictly based on the returned data.
@@ -97,7 +95,7 @@ if user_query := st.chat_input("What opportunities are you looking for?"):
     When no matches are found:
     “I couldn’t find any matches based on your criteria. Would you like to try again with different preferences? 🤔”
 
-    #Presenting Results
+    # Presenting Results
     Single Match
     “Here’s a match for you! 🏝️”
     Name: [Program Name]
@@ -113,7 +111,7 @@ if user_query := st.chat_input("What opportunities are you looking for?"):
     Use a clean, readable table format with sortable columns if possible.
     Columns should include: Name, Link, Deadline, Type, Location, Cost, Description, Requirements.
 
-    #Query Refinement
+    # Query Refinement
     Addressing Partial Matches
     If the results are incomplete:
     Recheck Query Logic: Ensure filters are applied correctly.
@@ -123,14 +121,12 @@ if user_query := st.chat_input("What opportunities are you looking for?"):
     Examples:
     User: “Show me opportunities related to healthcare or science.”
 
-
     Response: “Here are the healthcare and science-related opportunities I found! Let me know if you’d like me to refine this further.”
     User: “Show me paid local opportunities.”
 
-
     Response: “Here’s what I found for paid, local opportunities. Would you like to filter by deadline or type?”
 
-    #Testing and Refinement
+    # Testing and Refinement
     Regular Testing: Simulate diverse user queries to ensure accurate responses.
     Analyze Feedback: Address incomplete or incorrect results.
     Iterative Improvement: Adjust logic and instructions to enhance reliability and user satisfaction.
@@ -151,7 +147,19 @@ if user_query := st.chat_input("What opportunities are you looking for?"):
 
         # Extract and process the response
         result = response['choices'][0]['message']['content']
-        print(result)
+        st.session_state.messages.append({"role": "assistant", "content": result})
+        with st.chat_message("assistant"):
+            st.markdown(result)
 
-    except openai.error.OpenAIError as e:
-        print(f"Error: {e}")
+    except openai.error.APIError as e:
+        error_message = f"API error occurred: {str(e)}"
+        st.session_state.messages.append({"role": "assistant", "content": error_message})
+        with st.chat_message("assistant"):
+            st.markdown(error_message)
+
+    except Exception as e:
+        # Catch any other unexpected errors
+        error_message = f"An unexpected error occurred: {str(e)}"
+        st.session_state.messages.append({"role": "assistant", "content": error_message})
+        with st.chat_message("assistant"):
+            st.markdown(error_message)

@@ -3,6 +3,8 @@ import pandas as pd
 import openai
 import os
 
+
+
 # Title and description
 st.title("💬 Opportunity Chatbot")
 st.write(
@@ -136,7 +138,7 @@ if user_query := st.chat_input("What opportunities are you looking for?"):
     # Call the OpenAI API to generate a response
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-4",  # Make sure you're using the correct model
+            model="gpt-4o",  # Make sure you're using the correct model
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": prompt},

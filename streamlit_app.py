@@ -53,49 +53,55 @@ if user_query := st.chat_input("What opportunities are you looking for?"):
     with st.chat_message("user"):
         st.markdown(user_query)
 
-    # Create a GPT-4 prompt with the data and user query
-    prompt = f"""
-    ### Objective
-    The chatbot assists users in discovering relevant opportunities by querying the provided data. Responses should include:
-    - Relevant details about matching opportunities, including name, website, deadline, requirements, etc.
-    - A user-friendly display, with tables for multiple matches.
-    - Clarity, friendliness, and professionalism.
+    # Step 6: Filter the Data Based on User's Query
+    # For this example, let's filter based on 'Demographic Focus' or 'Scholarship Name' fields
+    matched_df = df[df.apply(lambda row: row.astype(str).str.contains(user_query, case=False).any(), axis=1)]
+    
+    if matched_df.empty:
+        st.error("No scholarships found matching your query. Please try again with different criteria.")
+    else:
+        # Step 7: Prepare the prompt for GPT
+        prompt = f"""
+        ### Objective
+        The chatbot assists users in discovering relevant opportunities by querying the provided data. Responses should include:
+        - Relevant details about matching opportunities, including name, website, deadline, requirements, etc.
+        - A user-friendly display, with tables for multiple matches.
+        - Clarity, friendliness, and professionalism.
 
-    ### Table Data
-    {df.head().to_string(index=False)}
+        User Query: {user_query}
+        Data Source: Use the table provided for matching opportunities.
 
-    ### User Query
-    {user_query}
-    """
+        ### Matching Scholarships:
+        {matched_df.to_markdown(index=False)}  # Display the filtered scholarships in markdown format
+        """
 
-    # Generate Chat Response using the OpenAI client
-    try:
-        response = client.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": prompt},
-            ],
-            temperature=0.2,
-        )
+        # Step 8: Generate Chat Response using the OpenAI client
+        try:
+            response = client.chat.completions.create(
+                model="gpt-3.5-turbo",
+                messages=[
+                    {"role": "system", "content": "You are a helpful assistant."},
+                    {"role": "user", "content": prompt},
+                ],
+                temperature=0.2,
+            )
 
-        # Debugging: Print the raw response to the app (can be hidden later)
-        st.write("**Debug Response:**", response)
+            # Debugging: Print the raw response to the app (can be hidden later)
+            st.write("**Debug Response:**", response)
 
-        # Extract and validate the response
-        if "choices" in response and len(response["choices"]) > 0:
-            # Extract the content from the first choice
-            assistant_message = response["choices"][0].get("message", {}).get("content", None)
-            if assistant_message:
-                st.session_state.messages.append({"role": "assistant", "content": assistant_message})
-                with st.chat_message("assistant"):
-                    st.markdown(assistant_message)
+            # Extract and display the result
+            if "choices" in response and len(response["choices"]) > 0:
+                assistant_message = response["choices"][0].get("message", {}).get("content", None)
+                if assistant_message:
+                    st.session_state.messages.append({"role": "assistant", "content": assistant_message})
+                    with st.chat_message("assistant"):
+                        st.markdown(assistant_message)
+                else:
+                    st.error("The assistant generated a response, but it was empty or improperly formatted. Please try again.")
             else:
-                st.error("The assistant generated a response, but it was empty or improperly formatted. Please try again.")
-        else:
-            st.error("The API returned a response, but it did not contain valid choices. Please try again.")
+                st.error("The API returned a response, but it did not contain valid choices. Please try again.")
 
-    except openai.error.OpenAIError as e:
-        st.error(f"An OpenAI API error occurred: {e}")
-    except Exception as e:
-        st.error(f"An unexpected error occurred: {e}")
+        except openai.error.OpenAIError as e:
+            st.error(f"An OpenAI API error occurred: {e}")
+        except Exception as e:
+            st.error(f"An unexpected error occurred: {e}")

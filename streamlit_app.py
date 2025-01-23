@@ -16,17 +16,31 @@ if not openai_api_key:
     st.info("Please add your OpenAI API key to continue.", icon="🗝️")
     st.stop()
 
-# Step 2: Load the Excel file from the repository
+# Step 2: Load the Excel file and preprocess it
 @st.cache_data
-def load_data():
+def load_and_preprocess_data():
     file_path = "Scholarships Export for Chatbot.xlsx"  # File in the same directory
     if not os.path.exists(file_path):
         st.error(f"File not found: {file_path}")
         st.stop()
-    return pd.read_excel(file_path)
+    
+    # Load the data
+    df = pd.read_excel(file_path)
+    
+    # Ensure Arrow compatibility by converting columns
+    for col in df.columns:
+        if df[col].dtype == "object":
+            df[col] = df[col].astype(str)  # Convert object columns to string
+    
+    # Clean "Amount Details" column
+    if "Amount Details" in df.columns:
+        df["Amount Details"] = df["Amount Details"].fillna("").astype(str)  # Ensure non-null strings
+    
+    return df
 
-df = load_data()
+df = load_and_preprocess_data()
 
+# Display a preview of the data
 st.write("### Preview of the Data")
 st.write(df.head())
 
@@ -165,9 +179,9 @@ if user_query := st.chat_input("What opportunities are you looking for?"):
     Iterative Improvement: Adjust logic and instructions to enhance reliability and user satisfaction.
 
     """
-
-    # Generate Chat Response using the new synchronous OpenAI API method
-    response = openai.chat.completions.create(  
+    
+    # Generate Chat Response using OpenAI API
+    response = openai.ChatCompletion.create(  
         model="gpt-4",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
@@ -176,12 +190,13 @@ if user_query := st.chat_input("What opportunities are you looking for?"):
     )
 
     if "choices" in response and len(response["choices"]) > 0:
-            result = response["choices"][0].get("message", {}).get("content", None)
-            if result:
-                st.session_state.messages.append({"role": "assistant", "content": result})
-                with st.chat_message("assistant"):
-                    st.markdown(result)
-            else:
-                st.error("The response is empty. Please try again or adjust your query.")
+        result = response["choices"][0].get("message", {}).get("content", None)
+        if result:
+            st.session_state.messages.append({"role": "assistant", "content": result})
+            with st.chat_message("assistant"):
+                st.markdown(result)
+        else:
+            st.error("The response is empty. Please try again or adjust your query.")
+
 
     

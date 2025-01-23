@@ -71,7 +71,7 @@ if user_query := st.chat_input("What opportunities are you looking for?"):
     # Generate Chat Response using the OpenAI client
     try:
         response = client.chat.completions.create(
-            model="gpt-3.5-turbo",
+            model="gpt-4",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": prompt},

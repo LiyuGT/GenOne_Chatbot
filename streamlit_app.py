@@ -61,8 +61,11 @@ if user_query := st.chat_input("What opportunities are you looking for?"):
     - A user-friendly display, with tables for multiple matches.
     - Clarity, friendliness, and professionalism.
 
-    User Query: {user_query}
-    Data Source: Use the table provided for matching opportunities.
+    ### Table Data
+    {df.head().to_string(index=False)}
+
+    ### User Query
+    {user_query}
     """
 
     # Generate Chat Response using the OpenAI client
@@ -83,9 +86,13 @@ if user_query := st.chat_input("What opportunities are you looking for?"):
         if "choices" in response and len(response["choices"]) > 0:
             result = response["choices"][0].get("message", {}).get("content", None)
             if result:
-                st.session_state.messages.append({"role": "assistant", "content": result})
-                with st.chat_message("assistant"):
-                    st.markdown(result)
+                # Check if the response contains a meaningful output
+                if "I can help" in result or "Please provide" in result:
+                    st.error("The chatbot did not return specific results. Try refining the query or checking the table data.")
+                else:
+                    st.session_state.messages.append({"role": "assistant", "content": result})
+                    with st.chat_message("assistant"):
+                        st.markdown(result)
             else:
                 st.error("The response is empty. Please try again or adjust your query.")
         else:

@@ -3,8 +3,6 @@ import pandas as pd
 import openai
 import os
 
-
-
 # Title and description
 st.title("💬 Opportunity Chatbot")
 st.write(
@@ -51,7 +49,7 @@ if user_query := st.chat_input("What opportunities are you looking for?"):
     st.session_state.messages.append({"role": "user", "content": user_query})
     with st.chat_message("user"):
         st.markdown(user_query)
-
+        
     # Create a GPT-4 prompt with the data and user query
     prompt = f"""
     # Objective
@@ -135,33 +133,29 @@ if user_query := st.chat_input("What opportunities are you looking for?"):
 
     """
 
-    # Call the OpenAI API to generate a response
+    # Verify OpenAI API key
+    try:
+        openai.Engine.list()  # Test the API key by listing available engines
+    except Exception:
+        st.error("Invalid OpenAI API Key. Please check and try again.")
+        st.stop()
+
+    # Generate Chat Response
     try:
         response = openai.ChatCompletion.create(
-            model="gpt-4o",  # Make sure you're using the correct model
+            model="gpt-4",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": prompt},
             ],
-            max_tokens=300,  # Set an appropriate token limit
-            temperature=0.7,  # Control the randomness of the response
+            max_tokens=300,
+            temperature=0.7,
         )
 
-        # Extract and process the response
         result = response['choices'][0]['message']['content']
         st.session_state.messages.append({"role": "assistant", "content": result})
         with st.chat_message("assistant"):
             st.markdown(result)
 
-    except openai.error.OpenAIError as e:
-        error_message = f"API error occurred: {str(e)}"
-        st.session_state.messages.append({"role": "assistant", "content": error_message})
-        with st.chat_message("assistant"):
-            st.markdown(error_message)
-
     except Exception as e:
-        # Catch any other unexpected errors
-        error_message = f"An unexpected error occurred: {str(e)}"
-        st.session_state.messages.append({"role": "assistant", "content": error_message})
-        with st.chat_message("assistant"):
-            st.markdown(error_message)
+        st.error(f"An error occurred: {e}")

@@ -133,22 +133,21 @@ if user_query := st.chat_input("What opportunities are you looking for?"):
 
     """
 
-    # Generate Chat Response
-    try:
-        response = openai.ChatCompletion.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": prompt},
-            ],
-            max_tokens=300,
-            temperature=0.7,
-        )
+    # Generate Chat Response using the updated OpenAI API method
+    response = openai.ChatCompletion.acreate(  # Note the updated method name: "acreate" for async calls
+        model="gpt-4",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": prompt},
+        ],
+        max_tokens=300,
+        temperature=0.7,
+    )
 
-        result = response['choices'][0]['message']['content']
-        st.session_state.messages.append({"role": "assistant", "content": result})
-        with st.chat_message("assistant"):
-            st.markdown(result)
+    # Extract and display the result
+    result = response["choices"][0]["message"]["content"]
+    st.session_state.messages.append({"role": "assistant", "content": result})
+    with st.chat_message("assistant"):
+        st.markdown(result)
 
-    except Exception as e:
-        st.error(f"An error occurred: {e}")
+    

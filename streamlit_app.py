@@ -82,21 +82,18 @@ if user_query := st.chat_input("What opportunities are you looking for?"):
         # Debugging: Print the raw response to the app (can be hidden later)
         st.write("**Debug Response:**", response)
 
-        # Extract and display the result
+        # Extract and validate the response
         if "choices" in response and len(response["choices"]) > 0:
-            result = response["choices"][0].get("message", {}).get("content", None)
-            if result:
-                # Check if the response contains a meaningful output
-                if "I can help" in result or "Please provide" in result:
-                    st.error("The chatbot did not return specific results. Try refining the query or checking the table data.")
-                else:
-                    st.session_state.messages.append({"role": "assistant", "content": result})
-                    with st.chat_message("assistant"):
-                        st.markdown(result)
+            # Extract the content from the first choice
+            assistant_message = response["choices"][0].get("message", {}).get("content", None)
+            if assistant_message:
+                st.session_state.messages.append({"role": "assistant", "content": assistant_message})
+                with st.chat_message("assistant"):
+                    st.markdown(assistant_message)
             else:
-                st.error("The response is empty. Please try again or adjust your query.")
+                st.error("The assistant generated a response, but it was empty or improperly formatted. Please try again.")
         else:
-            st.error("Failed to retrieve a response. Please try again.")
+            st.error("The API returned a response, but it did not contain valid choices. Please try again.")
 
     except openai.error.OpenAIError as e:
         st.error(f"An OpenAI API error occurred: {e}")

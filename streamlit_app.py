@@ -137,34 +137,21 @@ if user_query := st.chat_input("What opportunities are you looking for?"):
 
     """
 
-    # Call OpenAI API to generate Python code
-    response = openai.ChatCompletion.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant that generates Python code to query DataFrames."},
-            {"role": "user", "content": prompt},
-        ],
-        max_tokens=300,
-        temperature=0,
-    )
-
-    # Extract and execute the Python code from the response
-    code = response['choices'][0]['message']['content']
-    with st.chat_message("assistant"):
-        st.markdown("Let me process that for you...")
-
+    # Call the OpenAI API to generate a response
     try:
-        local_vars = {}
-        exec(code, {"df": df}, local_vars)
-        result = local_vars.get("result", "No result variable returned.")
+        response = openai.ChatCompletion.create(
+            model="gpt-4",  # Make sure you're using the correct model
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": prompt},
+            ],
+            max_tokens=300,  # Set an appropriate token limit
+            temperature=0.7,  # Control the randomness of the response
+        )
 
-        # Display the result
-        st.session_state.messages.append({"role": "assistant", "content": str(result)})
-        with st.chat_message("assistant"):
-            st.markdown(str(result))
+        # Extract and process the response
+        result = response['choices'][0]['message']['content']
+        print(result)
 
-    except Exception as e:
-        error_message = f"Error executing the generated code: {str(e)}"
-        st.session_state.messages.append({"role": "assistant", "content": error_message})
-        with st.chat_message("assistant"):
-            st.markdown(error_message)
+    except openai.error.OpenAIError as e:
+        print(f"Error: {e}")

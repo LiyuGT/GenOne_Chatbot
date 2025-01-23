@@ -134,18 +134,33 @@ if user_query := st.chat_input("What opportunities are you looking for?"):
     """
 
     # Generate Chat Response using the new synchronous OpenAI API method
-    response = openai.chat.completions.create(  
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": prompt},
-        ],
-    )
+    # Generate Chat Response using OpenAI API
+    try:
+        response = openai.ChatCompletion.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": prompt},
+            ],
+            max_tokens=300,
+            temperature=0.7,
+        )
 
-    # Extract and display the result
-    result = response["choices"][0]["message"]["content"]
-    st.session_state.messages.append({"role": "assistant", "content": result})
-    with st.chat_message("assistant"):
-        st.markdown(result)
+        # Ensure response structure is valid
+        if "choices" in response and len(response["choices"]) > 0:
+            result = response["choices"][0].get("message", {}).get("content", None)
+            if result:
+                st.session_state.messages.append({"role": "assistant", "content": result})
+                with st.chat_message("assistant"):
+                    st.markdown(result)
+            else:
+                st.error("The response is empty. Please try again or adjust your query.")
+        else:
+            st.error("The response format is invalid. Please try again or check your API call.")
+
+    except openai.error.OpenAIError as e:
+        st.error(f"OpenAI API error: {str(e)}")
+    except Exception as e:
+        st.error(f"An unexpected error occurred: {str(e)}")
 
     

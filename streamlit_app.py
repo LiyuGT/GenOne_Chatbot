@@ -18,7 +18,7 @@ if not openai_api_key:
 # Step 2: Load the Excel file from the repository
 @st.cache_data
 def load_data():
-    file_path = "./workspaces/GenOne_Chatbot/Scholarships Export for Chatbot.xlsx"  
+    file_path = "/workspaces/GenOne_Chatbot/Scholarships Export for Chatbot.xlsx"   
     return pd.read_excel(file_path)
 
 df = load_data()

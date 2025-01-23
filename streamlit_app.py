@@ -182,8 +182,8 @@ if user_query := st.chat_input("What opportunities are you looking for?"):
     
     # Generate Chat Response using OpenAI API
     # Generate Chat Response using the new synchronous OpenAI API method
-    response = openai.chat.completions.create( 
-        model="gpt-4",
+    response = openai.ChatCompletion.create( 
+        model="gpt-3.5-turbo",
         messages=[
             {"role": "system", "content": "You are a helpful assistant."},
             {"role": "user", "content": prompt},

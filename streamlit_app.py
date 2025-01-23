@@ -16,8 +16,8 @@ if not openai_api_key:
    st.info("Please add your OpenAI API key to continue.", icon="🗝️")
    st.stop()
 
-# Step 2: Initialize OpenAI API
-openai.api_key = openai_api_key  # Correct API initialization
+# Step 2: Initialize OpenAI API key directly
+openai.api_key = openai_api_key  # Directly set the API key
 
 # Step 3: Load the Excel file from the repository
 @st.cache_data

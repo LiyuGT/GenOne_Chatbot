@@ -1,56 +1,93 @@
 import streamlit as st
-from openai import OpenAI
+import pandas as pd
+import openai
 
-# Show title and description.
-st.title("💬 Chatbot")
+# Title and description
+st.title("💬 Opportunity Chatbot")
 st.write(
-    "This is a simple chatbot that uses OpenAI's GPT-3.5 model to generate responses. "
-    "To use this app, you need to provide an OpenAI API key, which you can get [here](https://platform.openai.com/account/api-keys). "
-    "You can also learn how to build this app step by step by [following our tutorial](https://docs.streamlit.io/develop/tutorials/llms/build-conversational-apps)."
+    "This chatbot allows users to query opportunities from a pre-uploaded Excel file. "
+    "It uses OpenAI's GPT-4 model to generate responses. To use this app, please provide your OpenAI API key."
 )
 
-# Ask user for their OpenAI API key via `st.text_input`.
-# Alternatively, you can store the API key in `./.streamlit/secrets.toml` and access it
-# via `st.secrets`, see https://docs.streamlit.io/develop/concepts/connections/secrets-management
+# Step 1: Request OpenAI API key
 openai_api_key = st.text_input("OpenAI API Key", type="password")
 if not openai_api_key:
     st.info("Please add your OpenAI API key to continue.", icon="🗝️")
-else:
+    st.stop()
 
-    # Create an OpenAI client.
-    client = OpenAI(api_key=openai_api_key)
+# Step 2: Load the Excel file from the repository
+@st.cache_data
+def load_data():
+    file_path = "./workspaces/GenOne_Chatbot/Scholarships Export for Chatbot.xlsx"  
+    return pd.read_excel(file_path)
 
-    # Create a session state variable to store the chat messages. This ensures that the
-    # messages persist across reruns.
-    if "messages" not in st.session_state:
-        st.session_state.messages = []
+df = load_data()
 
-    # Display the existing chat messages via `st.chat_message`.
-    for message in st.session_state.messages:
-        with st.chat_message(message["role"]):
-            st.markdown(message["content"])
+st.write("### Preview of the Data")
+st.write(df.head())
 
-    # Create a chat input field to allow the user to enter a message. This will display
-    # automatically at the bottom of the page.
-    if prompt := st.chat_input("What is up?"):
+# Step 3: Initialize OpenAI API
+openai.api_key = openai_api_key
 
-        # Store and display the current prompt.
-        st.session_state.messages.append({"role": "user", "content": prompt})
-        with st.chat_message("user"):
-            st.markdown(prompt)
+# Step 4: Chatbot Logic
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
-        # Generate a response using the OpenAI API.
-        stream = client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[
-                {"role": m["role"], "content": m["content"]}
-                for m in st.session_state.messages
-            ],
-            stream=True,
-        )
+# Display chat history
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
-        # Stream the response to the chat using `st.write_stream`, then store it in 
-        # session state.
+# Step 5: User Input
+if user_query := st.chat_input("What opportunities are you looking for?"):
+
+    # Add the user query to the session state
+    st.session_state.messages.append({"role": "user", "content": user_query})
+    with st.chat_message("user"):
+        st.markdown(user_query)
+
+    # Create a GPT-4 prompt with the data and user query
+    prompt = f"""
+    The following table contains data about summer opportunities:
+
+    {df.head(3).to_string(index=False)}
+
+    Columns available: {', '.join(df.columns)}.
+
+    User Query: {user_query}
+
+    Write Python code to filter the DataFrame (df) to provide the user with relevant information 
+    based on their query. The result should be a string or tabular response to display back to the user.
+    """
+
+    # Call OpenAI API to generate Python code
+    response = openai.ChatCompletion.create(
+        model="gpt-4",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant that generates Python code to query DataFrames."},
+            {"role": "user", "content": prompt},
+        ],
+        max_tokens=300,
+        temperature=0,
+    )
+
+    # Extract and execute the Python code from the response
+    code = response['choices'][0]['message']['content']
+    with st.chat_message("assistant"):
+        st.markdown("Let me process that for you...")
+
+    try:
+        local_vars = {}
+        exec(code, {"df": df}, local_vars)
+        result = local_vars.get("result", "No result variable returned.")
+
+        # Display the result
+        st.session_state.messages.append({"role": "assistant", "content": str(result)})
         with st.chat_message("assistant"):
-            response = st.write_stream(stream)
-        st.session_state.messages.append({"role": "assistant", "content": response})
+            st.markdown(str(result))
+
+    except Exception as e:
+        error_message = f"Error executing the generated code: {str(e)}"
+        st.session_state.messages.append({"role": "assistant", "content": error_message})
+        with st.chat_message("assistant"):
+            st.markdown(error_message)

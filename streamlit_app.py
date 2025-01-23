@@ -4,7 +4,7 @@ import openai
 import os
 
 
-# Title and description
+
 st.title("💬 Opportunity Chatbot")
 st.write(
    "This chatbot allows users to query opportunities from a pre-uploaded Excel file. "
@@ -12,25 +12,25 @@ st.write(
 )
 
 
-# Step 1: Request OpenAI API key
+# Request OpenAI API key
 openai_api_key = st.text_input("OpenAI API Key", type="password")
 if not openai_api_key:
    st.info("Please add your OpenAI API key to continue.", icon="🗝️")
    st.stop()
 
 
-# Step 2: Initialize OpenAI client
+
 client = openai.Client(api_key=openai_api_key)
 
 
-# Step 3: Load the Excel file from the repository
+# Load the Excel file 
 @st.cache_data
 def load_data():
    file_path = "Scholarships Export for Chatbot.xlsx"  # File in the same directory
    if not os.path.exists(file_path):
        st.error(f"File not found: {file_path}")
        st.stop()
-   # Ensure data is converted to compatible types to avoid errors
+   
    df = pd.read_excel(file_path)
    df = df.applymap(lambda x: str(x).strip() if isinstance(x, str) else x)
    return df
@@ -43,7 +43,7 @@ st.write("### Preview of the Data")
 st.write(df.head())
 
 
-# Step 4: Chatbot Logic
+# SChatbot Logic
 if "messages" not in st.session_state:
    st.session_state.messages = []
 
@@ -54,7 +54,7 @@ for message in st.session_state.messages:
        st.markdown(message["content"])
 
 
-# Step 5: User Input
+
 if user_query := st.chat_input("What opportunities are you looking for?"):
 
 
@@ -64,7 +64,7 @@ if user_query := st.chat_input("What opportunities are you looking for?"):
        st.markdown(user_query)
 
 
-   # Create a GPT-4 prompt with the data and user query
+  
    prompt = f"""
    ### Objective
    The chatbot assists users in discovering relevant opportunities by querying the provided data. Responses should include:
@@ -94,7 +94,7 @@ if user_query := st.chat_input("What opportunities are you looking for?"):
        )
 
 
-       # Debugging: Print the raw response to the app (can be hidden later)
+       # Debugging: 
        st.write("**Debug Response:**", response)
 
 

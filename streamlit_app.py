@@ -76,6 +76,9 @@ if user_query := st.chat_input("What opportunities are you looking for?"):
             temperature=0.2,
         )
 
+        # Debugging: Print the raw response to the app (can be hidden later)
+        st.write("**Debug Response:**", response)
+
         # Extract and display the result
         if "choices" in response and len(response["choices"]) > 0:
             result = response["choices"][0].get("message", {}).get("content", None)
@@ -89,4 +92,6 @@ if user_query := st.chat_input("What opportunities are you looking for?"):
             st.error("Failed to retrieve a response. Please try again.")
 
     except openai.error.OpenAIError as e:
-        st.error(f"An error occurred: {e}")
+        st.error(f"An OpenAI API error occurred: {e}")
+    except Exception as e:
+        st.error(f"An unexpected error occurred: {e}")

@@ -190,12 +190,11 @@ if user_query := st.chat_input("What opportunities are you looking for?"):
         ],
     )
 
-
     if "choices" in response and len(response["choices"]) > 0:
-            result = response["choices"][0].get("message", {}).get("content", None)
-            if result:
-                st.session_state.messages.append({"role": "assistant", "content": result})
-                with st.chat_message("assistant"):
-                    st.markdown(result)
-            else:
-                st.error("The response is empty. Please try again or adjust your query.")
+        result = response["choices"][0].get("message", {}).get("content", None)
+        if result:
+            st.session_state.messages.append({"role": "assistant", "content": result})
+            with st.chat_message("assistant"):
+                st.markdown(result)
+        else:
+            st.error("The response is empty. Please try again or adjust your query.")

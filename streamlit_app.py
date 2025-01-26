@@ -57,7 +57,7 @@ for message in st.session_state.messages:
 
 
 
-if user_query := st.chat_input("What opportunities are you looking for?"):
+if user_query := st.chat_input("What kind of scholarship opportunities are you looking for?"):
 
 
    # Add the user query to the session state
@@ -73,10 +73,11 @@ if user_query := st.chat_input("What opportunities are you looking for?"):
    - Relevant details about matching opportunities, including name, website, deadline, requirements, etc.
    - A user-friendly display, with tables for multiple matches.
    - Clarity, friendliness, and professionalism.
+   - make sure to look through the full data and provide all the matching responses.
 
 
    ### Table Data
-   {df.head().to_string(index=False)}
+  {df.to_string(index=False)}
 
 
    ### User Query

@@ -1,3 +1,4 @@
+#import libraries
 import streamlit as st
 import pandas as pd
 import openai
@@ -5,7 +6,7 @@ import os
 
 
 
-st.title("💬 Opportunity Chatbot")
+st.title("💬 GenOne Scholarship Opportunity Chatbot")
 st.write(
    "This chatbot allows users to query opportunities from a pre-uploaded Excel file. "
    "It uses OpenAI's GPT-4 model to generate responses. To use this app, please provide your OpenAI API key."
@@ -26,11 +27,12 @@ client = openai.Client(api_key=openai_api_key)
 # Load the Excel file 
 @st.cache_data
 def load_data():
-   file_path = "Scholarships Export for Chatbot.xlsx"  # File in the same directory
+   file_path = "Scholarships Export for Chatbot.xlsx"  # File uploaded in the same directory
    if not os.path.exists(file_path):
        st.error(f"File not found: {file_path}")
        st.stop()
    
+   #read the file
    df = pd.read_excel(file_path)
    df = df.applymap(lambda x: str(x).strip() if isinstance(x, str) else x)
    return df
@@ -43,7 +45,7 @@ st.write("### Preview of the Data")
 st.write(df.head())
 
 
-# SChatbot Logic
+# Chatbot Logic
 if "messages" not in st.session_state:
    st.session_state.messages = []
 

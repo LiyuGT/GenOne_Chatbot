@@ -3,6 +3,7 @@ import streamlit as st
 import pandas as pd
 import openai
 import os
+from openai.error import OpenAIError
 
 st.title("💬 GenOne Scholarship Opportunity Chatbot")
 st.write(

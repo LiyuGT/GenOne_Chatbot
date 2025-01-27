@@ -19,13 +19,7 @@ if not openai_api_key:
 else:
     openai.api_key = openai_api_key  # Set OpenAI API key
 
-'''
-# Request OpenAI API key
-openai_api_key = st.text_input("OpenAI API Key", type="password")
-if not openai_api_key:
-    st.info("Please add your OpenAI API key to continue.", icon="🗝️")
-    st.stop()
-'''
+
 
 client = openai.Client(api_key=openai_api_key)
 

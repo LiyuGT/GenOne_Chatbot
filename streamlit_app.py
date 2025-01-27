@@ -95,6 +95,6 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
         
         # Debug: Print the raw response
     st.write("### OpenAI Response Debug")
-    st.dataframe(df)
+    st.dataframe(response)
         
 

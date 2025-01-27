@@ -95,8 +95,10 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
         
         # Debug: Print the raw response
     st.write("### OpenAI Response Debug")
+    st.write("# Response should be in the Choices row, double click to see")
     st.dataframe(response)
-    
+
+'''
 import pandas as pd
 import streamlit as st
 
@@ -122,6 +124,6 @@ choices_df = pd.DataFrame(choices_data)
 # Display in Streamlit app
 st.write("### Choices Data")
 st.dataframe(choices_df)
-
+'''
         
 

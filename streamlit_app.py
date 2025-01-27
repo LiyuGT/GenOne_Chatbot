@@ -41,7 +41,7 @@ def load_data():
 
 df = load_data()
 
-st.write("### Preview of all Scholars")
+st.write("### Preview of all Scholarships")
 st.dataframe(df)
 
 # Extract unique school options from the column

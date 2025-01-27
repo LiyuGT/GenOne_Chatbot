@@ -3,7 +3,7 @@ import streamlit as st
 import pandas as pd
 import openai
 import os
-#from openai.error import OpenAIError
+import io
 
 st.title("💬 GenOne Scholarship Opportunity Chatbot")
 st.write(
@@ -11,11 +11,21 @@ st.write(
     "It uses OpenAI's GPT-4 model to generate responses. To use this app, please provide your OpenAI API key."
 )
 
+# Load the OpenAI API key securely from environment variables
+openai_api_key = os.getenv("OPENAI_API_KEY")
+
+if not openai_api_key:
+    st.error("Please contact Admin for issue associated with missing OpenAI API key.")
+else:
+    openai.api_key = openai_api_key  # Set OpenAI API key
+
+'''
 # Request OpenAI API key
 openai_api_key = st.text_input("OpenAI API Key", type="password")
 if not openai_api_key:
     st.info("Please add your OpenAI API key to continue.", icon="🗝️")
     st.stop()
+'''
 
 client = openai.Client(api_key=openai_api_key)
 

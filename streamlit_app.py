@@ -85,7 +85,7 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
     # Generate Chat Response using the OpenAI client
    # Generate Chat Response using the OpenAI client
     try:
-        response = client.chat.completion.create(
+        response = client.chat.completions.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},

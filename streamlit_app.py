@@ -83,30 +83,18 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
     """
 
     # Generate Chat Response using the OpenAI client
-    try:
-        response = client.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": prompt},
-            ],
-            temperature=0.2,
-        )
+
+    response = client.chat.completions.create(
+        model="gpt-4",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": prompt},
+        ],
+        temperature=0.2,
+    )
         
         # Debug: Print the raw response
-        st.write("### OpenAI Response Debug")
-        st.dataframe(df)
+    st.write("### OpenAI Response Debug")
+    st.dataframe(df)
         
-        # Check if choices exist and extract content
-        if response.get("choices"):
-            assistant_response = response["choices"][0].get("message", {}).get("content", "")
-            if not assistant_response:
-                st.error("OpenAI API did not return a valid response.")
-                st.stop()
-        else:
-            st.error("No choices returned in the OpenAI API response.")
-            st.stop()
 
-    except Exception as e:
-        st.error(f"An error occurred: {e}")
-        st.stop()

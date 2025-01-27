@@ -8,7 +8,7 @@ import io
 st.title("💬 GenOne Scholarship Opportunity Chatbot")
 st.write(
     "This chatbot allows users to query opportunities from a pre-uploaded Excel file. "
-    "It uses OpenAI's GPT-4 model to generate responses. To use this app, please provide your OpenAI API key."
+    "It uses OpenAI's GPT-4 model to generate responses. "
 )
 
 # Load the OpenAI API key securely from environment variables

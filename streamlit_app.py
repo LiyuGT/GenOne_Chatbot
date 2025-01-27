@@ -96,5 +96,32 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
         # Debug: Print the raw response
     st.write("### OpenAI Response Debug")
     st.dataframe(response)
+    
+import pandas as pd
+import streamlit as st
+
+# Simulated response object for demonstration
+
+
+# Extract the "choices" field
+choices = response.get("choices", [])
+
+# Parse choices into a list of dictionaries
+choices_data = []
+for choice in choices:
+    choices_data.append({
+        "Index": choice.get("index"),
+        "Finish Reason": choice.get("finish_reason"),
+        "Role": choice.get("message", {}).get("role"),
+        "Content": choice.get("message", {}).get("content")
+    })
+
+# Convert the list of dictionaries to a DataFrame
+choices_df = pd.DataFrame(choices_data)
+
+# Display in Streamlit app
+st.write("### Choices Data")
+st.dataframe(choices_df)
+
         
 

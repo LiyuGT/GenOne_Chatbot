@@ -83,7 +83,6 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
     """
 
     # Generate Chat Response using the OpenAI client
-   # Generate Chat Response using the OpenAI client
     try:
         response = client.chat.completions.create(
             model="gpt-4",
@@ -96,7 +95,7 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
         
         # Debug: Print the raw response
         st.write("### OpenAI Response Debug")
-        st.json(response)
+        st.dataframe(df)
         
         # Check if choices exist and extract content
         if response.get("choices"):

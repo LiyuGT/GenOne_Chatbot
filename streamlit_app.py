@@ -94,7 +94,7 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
     )
 
         # Debugging:
-    #st.write(response)
+    st.write(response)
 
     # Extract the content from the response
     assistant_response = response["choices"][0]["message"]["content"]

@@ -94,16 +94,7 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
     )
 
         # Debugging:
-    st.write("**Debug Response:**", response)
+    st.write(response)
 
-        # Extract and validate the response
-            # Extract the content from the first choice
-    #assistant_message = response["choices"][0].get("message", {}).get("content", None)
-    assistant_message = response.choices[0].message['content']
-    if assistant_message:
-        st.session_state.messages.append({"role": "assistant", "content": assistant_message})
-        with st.chat_message("assistant"):
-            st.markdown(assistant_message)
-    else:
-        st.error("The assistant generated a response, but it was empty or improperly formatted. Please try again.")
+
         

@@ -1,8 +1,9 @@
-# Import libraries
+#import libraries
 import streamlit as st
 import pandas as pd
 import openai
 import os
+#from openai.error import OpenAIError
 
 st.title("💬 GenOne Scholarship Opportunity Chatbot")
 st.write(
@@ -16,8 +17,7 @@ if not openai_api_key:
     st.info("Please add your OpenAI API key to continue.", icon="🗝️")
     st.stop()
 
-# Set OpenAI API key
-openai.api_key = openai_api_key
+client = openai.Client(api_key=openai_api_key)
 
 # Load the Excel file
 @st.cache_data
@@ -66,11 +66,6 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
     # Filter data based on selected school
     filtered_data = df if selected_school == "none" else df[df["School (if specific)"] == selected_school]
 
-    # Ensure filtered data isn't too large for the prompt
-    if filtered_data.shape[0] > 20:  # Limit rows for token efficiency
-        st.warning("Filtered data is too large. Showing the first 20 rows only.")
-        filtered_data = filtered_data.head(20)
-
     # Prepare the prompt for OpenAI API
     prompt = f"""
     ### Objective
@@ -87,9 +82,9 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
     {user_query}
     """
 
-    # Generate Chat Response using the OpenAI API
+    # Generate Chat Response using the OpenAI client
     try:
-        response = openai.ChatCompletion.create(
+        response = client.chat.completions.create(
             model="gpt-4",
             messages=[
                 {"role": "system", "content": "You are a helpful assistant."},
@@ -98,7 +93,7 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
             temperature=0.2,
         )
 
-        # Debugging: Print the full response to the Streamlit app (optional)
+        # Debugging:
         st.write("**Debug Response:**", response)
 
         # Extract and validate the response

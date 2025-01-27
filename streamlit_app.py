@@ -83,41 +83,31 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
     """
 
     # Generate Chat Response using the OpenAI client
-   
-    response = client.chat.completions.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": prompt},
-        ],
-        temperature=0.2,
-    )
+   # Generate Chat Response using the OpenAI client
+    try:
+        response = client.chat_completions.create(
+            model="gpt-4",
+            messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
+                {"role": "user", "content": prompt},
+            ],
+            temperature=0.2,
+        )
+        
+        # Debug: Print the raw response
+        st.write("### OpenAI Response Debug")
+        st.json(response)
+        
+        # Check if choices exist and extract content
+        if response.get("choices"):
+            assistant_response = response["choices"][0].get("message", {}).get("content", "")
+            if not assistant_response:
+                st.error("OpenAI API did not return a valid response.")
+                st.stop()
+        else:
+            st.error("No choices returned in the OpenAI API response.")
+            st.stop()
 
-        # Debugging:
-    st.write(response)
-
-    # Extract the content from the response
-    assistant_response = response["choices"][0]["message"]["content"]
-
-    # Parse the response to extract scholarship data
-    # The response from the assistant is in a formatted list format; we need to parse it
-    import re
-
-    # Extract individual scholarships from the response
-    scholarship_data = []
-    for match in re.finditer(r"\d+\.\s\[(.*?)\]\((.*?)\):\s(.*?)\.", assistant_response):
-        name = match.group(1)  # Scholarship name
-        link = match.group(2)  # URL
-        details = match.group(3)  # Details (e.g., "This opportunity has varied deadlines...")
-        scholarship_data.append({"Name": name, "Link": link, "Details": details})
-
-    # Convert the data into a DataFrame for better presentation
-    scholarship_df = pd.DataFrame(scholarship_data)
-
-    # Display the data in a table format
-    st.write("### Available Scholarship Opportunities")
-    st.dataframe(scholarship_df)
-
-
-
-            
+    except Exception as e:
+        st.error(f"An error occurred: {e}")
+        st.stop()

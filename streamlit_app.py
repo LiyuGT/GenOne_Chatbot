@@ -83,30 +83,26 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
     """
 
     # Generate Chat Response using the OpenAI client
-    try:
-        response = client.chat.completions.create(
-            model="gpt-4",
-            messages=[
-                {"role": "system", "content": "You are a helpful assistant."},
-                {"role": "user", "content": prompt},
-            ],
-            temperature=0.2,
-        )
+   
+    response = client.chat.completions.create(
+        model="gpt-4",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": prompt},
+        ],
+        temperature=0.2,
+    )
 
         # Debugging:
-        st.write("**Debug Response:**", response)
+    st.write("**Debug Response:**", response)
 
         # Extract and validate the response
             # Extract the content from the first choice
-        assistant_message = response["choices"][0].get("message", {}).get("content", None)
-        if assistant_message:
-            st.session_state.messages.append({"role": "assistant", "content": assistant_message})
-            with st.chat_message("assistant"):
-                st.markdown(assistant_message)
-        else:
-            st.error("The assistant generated a response, but it was empty or improperly formatted. Please try again.")
+    assistant_message = response["choices"][0].get("message", {}).get("content", None)
+    if assistant_message:
+        st.session_state.messages.append({"role": "assistant", "content": assistant_message})
+        with st.chat_message("assistant"):
+            st.markdown(assistant_message)
+    else:
+        st.error("The assistant generated a response, but it was empty or improperly formatted. Please try again.")
         
-    except openai.error.OpenAIError as e:
-        st.error(f"An OpenAI API error occurred: {e}")
-    except Exception as e:
-        st.error(f"An unexpected error occurred: {e}")

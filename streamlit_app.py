@@ -98,7 +98,8 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
 
         # Extract and validate the response
             # Extract the content from the first choice
-    assistant_message = response["choices"][0].get("message", {}).get("content", None)
+    #assistant_message = response["choices"][0].get("message", {}).get("content", None)
+    assistant_message = response.choices[0].message['content']
     if assistant_message:
         st.session_state.messages.append({"role": "assistant", "content": assistant_message})
         with st.chat_message("assistant"):

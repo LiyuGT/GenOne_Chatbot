@@ -41,8 +41,8 @@ def load_data():
 
 df = load_data()
 
-st.write("### Preview of the Data")
-st.write(df.head())
+st.write("### Preview of all Scholars")
+st.dataframe(df)
 
 # Extract unique school options from the column
 school_options = sorted(df["School (if specific)"].unique())

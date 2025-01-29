@@ -89,20 +89,26 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
     # Generate Chat Response using the OpenAI client
 
     response = client.chat.completions.create(
-        model="gpt-4",
-        messages=[
-            {"role": "system", "content": "You are a helpful assistant."},
-            {"role": "user", "content": prompt},
-        ],
-        temperature=0.2,
-    )
-        
+    model="gpt-4",
+    messages=[
+        {"role": "system", "content": "You are a helpful assistant."},
+        {"role": "user", "content": prompt},
+    ],
+    temperature=0.2,
+)
+
+# Extract the actual response content safely
+if response and response.choices:
+    response_content = response.choices[0].message.content
+else:
+    response_content = "No response received from OpenAI."
+
 # Function to parse OpenAI response into structured format
 def parse_scholarships(response_content):
     lines = response_content.split("\n")
     scholarships = []
 
-    # Identify table lines
+    # Identify table lines and process them
     for line in lines:
         parts = line.split("|")
         if len(parts) >= 5:
@@ -115,23 +121,18 @@ def parse_scholarships(response_content):
     else:
         return pd.DataFrame()  # Return empty if no data found
 
-# Extract response content
-response_content = response.choices[0].message.content
-
-# Debug: Print raw response
+# Debug: Show raw response from OpenAI
 st.write("### OpenAI Response Debug")
 st.write("##### Response should be in the Choices row, double-click to see")
-st.dataframe(response)
+st.text(response_content)  # Display raw text response for debugging
 
-# Parse the response into a structured table
+# Parse response into a structured table
 df_scholarships = parse_scholarships(response_content)
 
-# Display the scholarships table in required format
+# Display the scholarships table in the required format
 if not df_scholarships.empty:
     df_scholarships = df_scholarships[["Scholarship Name", "Amount", "Requirements", "Scholarship Website", "Deadline Status"]]
     st.write("### Matching Scholarship Opportunities")
     st.dataframe(df_scholarships)
 else:
     st.write("No scholarships found matching your query.")
-
-

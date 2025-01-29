@@ -162,8 +162,7 @@ if not df_scholarships.empty:
    df_scholarships = df_scholarships[["Scholarship Name", "Amount", "Requirements", "Scholarship Website", "Deadline Status"]]
    st.write("### Matching Scholarship Opportunities")
    st.dataframe(df_scholarships)
-else:
-   st.write("No scholarships found matching your query.")
+
 
 
 

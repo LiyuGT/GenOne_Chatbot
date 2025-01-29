@@ -1,75 +1,47 @@
-#import libraries
 import streamlit as st
 import pandas as pd
 import openai
 import os
-import io
 
 st.title("💬 GenOne Scholarship Opportunity Chatbot")
-st.write(
-    "This chatbot allows users to query opportunities from a pre-uploaded Excel file. "
-    "It uses OpenAI's GPT-4 model to generate responses. "
-)
 
-# Load the OpenAI API key securely from environment variables
+# Load OpenAI API key
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
 if not openai_api_key:
-    st.error("Please contact Admin for issue associated with missing OpenAI API key.")
+    st.error("Please contact Admin for missing OpenAI API key.")
 else:
     openai.api_key = openai_api_key  # Set OpenAI API key
 
-
-
 client = openai.Client(api_key=openai_api_key)
 
-# Load the Excel file
-@st.cache_data
-def load_data():
-    file_path = "Scholarships Export for Chatbot.xlsx"  # File uploaded in the same directory
-    if not os.path.exists(file_path):
-        st.error(f"File not found: {file_path}")
-        st.stop()
-    
-    # Read the file
-    df = pd.read_excel(file_path)
-    df = df.applymap(lambda x: str(x).strip() if isinstance(x, str) else x)
-    
-    # Replace empty cells in the "School (if specific)" column with "none"
-    df["School (if specific)"] = df["School (if specific)"].fillna("none")
+# Function to parse the response and create a DataFrame
+def parse_scholarships(response_content):
+    lines = response_content.split("\n")
+    scholarships = []
+
+    # Find where the table starts
+    table_start = False
+    for line in lines:
+        if line.startswith("| Scholarship Name"):
+            table_start = True
+            continue
+        if table_start and line.startswith("|"):
+            parts = [x.strip() for x in line.split("|")[1:-1]]  # Split and remove empty parts
+            if len(parts) == 5:  # Ensure it's a valid row
+                scholarships.append(parts)
+
+    # Convert to DataFrame
+    df = pd.DataFrame(
+        scholarships,
+        columns=["Scholarship Name", "Scholarship Website", "Deadline Status", "Amount", "Requirements"]
+    )
+
     return df
 
-df = load_data()
-
-st.write("### Preview of all Scholarships")
-st.dataframe(df)
-
-# Extract unique school options from the column
-school_options = sorted(df["School (if specific)"].unique())
-
-# Dropdown for school selection
-selected_school = st.selectbox("Select the school related to your scholarship search:", school_options)
-
-# Chatbot Logic
-if "messages" not in st.session_state:
-    st.session_state.messages = []
-
-# Display chat history
-for message in st.session_state.messages:
-    with st.chat_message(message["role"]):
-        st.markdown(message["content"])
-
-# Wait for the user's query
+# User query input
 if user_query := st.chat_input("What kind of scholarship opportunities are you looking for?"):
-
-    # Add the user query to the session state
-    st.session_state.messages.append({"role": "user", "content": user_query})
-    with st.chat_message("user"):
-        st.markdown(user_query)
-
-    # Filter data based on selected school
-    filtered_data = df if selected_school == "none" else df[df["School (if specific)"] == selected_school]
-
+    
     # Prepare the prompt for OpenAI API
     prompt = f"""
     ### Objective
@@ -79,15 +51,11 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
     - Clarity, friendliness, and professionalism.
     - Make sure to look through the full data and provide all the matching responses.
 
-    ### Filtered Table Data
-    {filtered_data.to_string(index=False)}
-
     ### User Query
     {user_query}
     """
 
-    # Generate Chat Response using the OpenAI client
-
+    # Generate Chat Response using OpenAI API
     response = client.chat.completions.create(
         model="gpt-4",
         messages=[
@@ -96,8 +64,18 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
         ],
         temperature=0.2,
     )
-        
-        # Debug: Print the raw response
+
+    # Extract response content
+    response_content = response.choices[0].message.content
+
+    # Debug: Print raw response
     st.write("### OpenAI Response Debug")
-    st.write("##### Response should be in the Choices row, double click to see")
+    st.write("##### Response should be in the Choices row, double-click to see")
     st.dataframe(response)
+
+    # Parse the response into a structured table
+    df_scholarships = parse_scholarships(response_content)
+
+    # Display the scholarships table
+    st.write("### Matching Scholarship Opportunities")
+    st.dataframe(df_scholarships)

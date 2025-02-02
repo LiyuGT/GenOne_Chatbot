@@ -84,7 +84,7 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
 
 
    # Filter data based on selected school
-   filtered_data = df if selected_school == "none" else df[df["School (if specific)"] == selected_school]
+   filtered_data = df if selected_school == "Not School specific" else df[df["School (if specific)"] == selected_school]
 
 
    # Prepare the prompt for OpenAI API

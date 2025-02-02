@@ -37,8 +37,8 @@ def load_data():
    df["School (if specific)"] = df["School (if specific)"].fillna("none")
 
    # Ensure "Demographic" column exists
-   if "Demographic" not in df.columns:
-       df["Demographic"] = "Unknown"
+   if "Demographic focus" not in df.columns:
+       df["Demographic focus"] = "Unknown"
 
    return df
 
@@ -55,7 +55,7 @@ selected_school = st.selectbox("Select the school related to your scholarship se
 
 # Add demographic dropdown only if "none" is selected
 if selected_school == "none":
-    demographic_options = sorted(df["Demographic"].dropna().unique())  # Ensure no NaN values
+    demographic_options = sorted(df["Demographic focus"].dropna().unique())  # Ensure no NaN values
     selected_demographic = st.selectbox("Select your demographic group:", ["All"] + demographic_options)
 else:
     selected_demographic = None  # No demographic filtering when a school is selected
@@ -85,7 +85,7 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
         
         # Apply demographic filter if "All" is not selected
         if selected_demographic and selected_demographic != "All":
-            filtered_data = filtered_data[filtered_data["Demographic"] == selected_demographic]
+            filtered_data = filtered_data[filtered_data["Demographic focus"] == selected_demographic]
     else:
         filtered_data = df[df["School (if specific)"] == selected_school]
 

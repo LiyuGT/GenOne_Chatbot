@@ -145,7 +145,7 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
     else:
         response_content = "No response received from OpenAI."
 
-    # Function to parse response into structured format
+    # Function to parse response into structured format and make URLs clickable
     def parse_scholarships(response_content):
         lines = response_content.strip().split("\n")
         scholarships = []
@@ -153,14 +153,22 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
         for line in lines:
             parts = line.split("|")
             if len(parts) >= 5:
-                scholarships.append([p.strip() for p in parts[1:-1]])  # Remove empty parts
+                scholarship_name = parts[1].strip()
+                amount = parts[2].strip()
+                requirements = parts[3].strip()
+                scholarship_website = parts[4].strip()
+                
+                # Make the URL clickable using markdown
+                scholarship_website = f"[{scholarship_website}]({scholarship_website})"
+                
+                scholarships.append([scholarship_name, amount, requirements, scholarship_website])
 
         if scholarships:
-            df_scholarships = pd.DataFrame(scholarships[1:], columns=scholarships[0])  # First row as headers
+            df_scholarships = pd.DataFrame(scholarships, columns=["Scholarship Name", "Amount", "Requirements", "Scholarship Website"])
             return df_scholarships
-        return pd.DataFrame(columns=["Scholarship Name", "Amount", "Requirements", "Scholarship Website", "Deadline Status"])  # Ensure empty DF has correct headers
+        return pd.DataFrame(columns=["Scholarship Name", "Amount", "Requirements", "Scholarship Website"])  # Ensure empty DF has correct headers
 
-    # Parse response into a structured table
+    # Parse response into a structured table with clickable URLs
     df_scholarships = parse_scholarships(response_content)
 
     if df_scholarships.empty:

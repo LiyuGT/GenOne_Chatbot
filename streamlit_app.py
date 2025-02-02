@@ -36,7 +36,15 @@ def load_data():
 
 df = load_data()
 
-st.write("### Preview of all Scholarships")
+# Allow the user to select a school before querying
+school_options = df["School Name"].dropna().unique().tolist()
+selected_school = st.selectbox("Select Your School", ["All"] + school_options)
+
+# Filter the dataframe based on the selected school
+if selected_school != "All":
+   df = df[df["School Name"] == selected_school]
+
+st.write("### Preview of Matching Scholarships")
 st.dataframe(df)
 
 # Chatbot Logic
@@ -47,6 +55,7 @@ if "messages" not in st.session_state:
 for message in st.session_state.messages:
    with st.chat_message(message["role"]):
        st.markdown(message["content"])
+
 # Wait for the user's query
 if user_query := st.chat_input("What kind of scholarship opportunities are you looking for?"):
 
@@ -64,7 +73,7 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
    - Clarity, friendliness, and professionalism.
    - Make sure to look through the full data and provide all the matching responses.
 
-   ### Full Table Data
+   ### Filtered Scholarship Data
    {df.to_string(index=False)}
 
    ### User Query
@@ -73,50 +82,50 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
 
    # Generate Chat Response using the OpenAI client
    response = client.chat.completions.create(
-       model="gpt-4",
-       messages=[
-           {"role": "system", "content": "You are a helpful assistant."},
-           {"role": "user", "content": prompt},
-       ],
-       temperature=0.2,
-   )
+   model="gpt-4",
+   messages=[
+       {"role": "system", "content": "You are a helpful assistant."},
+       {"role": "user", "content": prompt},
+   ],
+   temperature=0.2,
+)
 
-   # Extract the actual response content safely
-   if response and response.choices:
-       response_content = response.choices[0].message.content
+# Extract the actual response content safely
+if response and response.choices:
+   response_content = response.choices[0].message.content
+else:
+   response_content = "No response received from OpenAI."
+
+# Function to parse OpenAI response into structured format
+def parse_scholarships(response_content):
+   lines = response_content.split("\n")
+   scholarships = []
+
+   # Identify table lines and process them
+   for line in lines:
+       parts = line.split("|")
+       if len(parts) >= 5:
+           scholarships.append([p.strip() for p in parts[1:-1]])  # Remove empty parts
+
+   # Convert parsed data into DataFrame
+   if scholarships:
+       df_scholarships = pd.DataFrame(scholarships[1:], columns=scholarships[0])  # First row as headers
+       return df_scholarships
    else:
-       response_content = "No response received from OpenAI."
+       return pd.DataFrame()  # Return empty if no data found
 
-   # Function to parse OpenAI response into structured format
-   def parse_scholarships(response_content):
-       lines = response_content.split("\n")
-       scholarships = []
+# Debug: Show raw response from OpenAI
+st.write("### OpenAI Response Debug")
+st.write("##### Response should be in the Choices row, double-click to see")
+st.text(response_content)  # Display raw text response for debugging
 
-       # Identify table lines and process them
-       for line in lines:
-           parts = line.split("|")
-           if len(parts) >= 5:
-               scholarships.append([p.strip() for p in parts[1:-1]])  # Remove empty parts
+# Parse response into a structured table
+df_scholarships = parse_scholarships(response_content)
 
-       # Convert parsed data into DataFrame
-       if scholarships:
-           df_scholarships = pd.DataFrame(scholarships[1:], columns=scholarships[0])  # First row as headers
-           return df_scholarships
-       else:
-           return pd.DataFrame()  # Return empty if no data found
-
-   # Debug: Show raw response from OpenAI
-   st.write("### OpenAI Response Debug")
-   st.write("##### Response should be in the Choices row, double-click to see")
-   st.text(response_content)  # Display raw text response for debugging
-
-   # Parse response into a structured table
-   df_scholarships = parse_scholarships(response_content)
-
-   # Display the scholarships table in the required format
-   if not df_scholarships.empty:
-       df_scholarships = df_scholarships[["Scholarship Name", "Amount", "Requirements", "Scholarship Website", "Deadline Status"]]
-       st.write("### Matching Scholarship Opportunities")
-       st.dataframe(df_scholarships)
-   else:
-       st.write("No scholarships found matching your query.")
+# Display the scholarships table in the required format
+if not df_scholarships.empty:
+   df_scholarships = df_scholarships[["Scholarship Name", "Amount", "Requirements", "Scholarship Website", "Deadline Status"]]
+   st.write("### Matching Scholarship Opportunities")
+   st.dataframe(df_scholarships)
+else:
+   st.write("No scholarships found matching your query.")

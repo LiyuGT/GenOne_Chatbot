@@ -55,10 +55,17 @@ selected_school = st.selectbox("Select the school related to your scholarship se
 
 # Add demographic dropdown only if "none" is selected
 if selected_school == "none":
-    demographic_options = sorted(df["Demographic focus"].dropna().unique())  # Ensure no NaN values
-    selected_demographic = st.selectbox("Select your demographic group:", ["All"] + demographic_options)
+    # Replace NaN values with "none" before extracting unique options
+    df["Demographic focus"] = df["Demographic focus"].fillna("none")
+    
+    # Extract unique demographic options (including "none")
+    demographic_options = sorted(df["Demographic focus"].unique())
+
+    # Create a dropdown with only the available demographic options
+    selected_demographic = st.selectbox("Select your demographic group:", demographic_options)
 else:
     selected_demographic = None  # No demographic filtering when a school is selected
+
 
 # Chatbot Logic (stores all previous user messages)
 if "messages" not in st.session_state:

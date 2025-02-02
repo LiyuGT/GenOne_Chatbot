@@ -138,9 +138,9 @@ def parse_scholarships(response_content):
 
 
 # Debug: Show raw response from OpenAI
-st.write("### OpenAI Response Debug")
-st.write("##### Response should be in the Choices row, double-click to see")
-st.text(response_content)  # Display raw text response for debugging
+#st.write("### OpenAI Response Debug")
+#st.write("##### Response should be in the Choices row, double-click to see")
+#st.text(response_content)  # Display raw text response for debugging
 
 
 # Parse response into a structured table

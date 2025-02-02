@@ -111,10 +111,10 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
 
 
 # Extract the actual response content safely
-if response and response.choices:
-   response_content = response.choices[0].message.content
+if response and hasattr(response, "choices"):
+    response_content = response.choices[0].message.content
 else:
-   response_content = "No response received from OpenAI."
+    response_content = "No response received from OpenAI."
 
 
 # Function to parse OpenAI response into structured format

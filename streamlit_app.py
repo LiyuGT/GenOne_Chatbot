@@ -19,6 +19,7 @@ if not openai_api_key:
 else:
    openai.api_key = openai_api_key  # Set OpenAI API key
 
+# OpenAI API client using the provided API key
 client = openai.Client(api_key=openai_api_key)
 
 # Load the Excel file
@@ -52,17 +53,17 @@ school_options = sorted(df["School (if specific)"].unique())
 selected_school = st.selectbox("Select the school related to your scholarship search:", school_options)
 
 
-# Chatbot Logic
+# Chatbot Logic (sores all previous user messages)
 if "messages" not in st.session_state:
    st.session_state.messages = []
 
-
-# Display chat history
 for message in st.session_state.messages:
    with st.chat_message(message["role"]):
        st.markdown(message["content"])
 
+# set response to none (removes the error)
 response = None
+
 # Wait for the user's query
 if user_query := st.chat_input("What kind of scholarship opportunities are you looking for?"):
 
@@ -98,8 +99,6 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
 
 
    # Generate Chat Response using the OpenAI client
-
-
    response = client.chat.completions.create(
    model="gpt-4",
    messages=[
@@ -117,7 +116,7 @@ else:
     response_content = "No response received from OpenAI."
 
 
-# Function to parse OpenAI response into structured format
+# Function to parse response into structured format
 def parse_scholarships(response_content):
     lines = response_content.strip().split("\n")
     scholarships = []

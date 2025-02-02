@@ -43,6 +43,9 @@ df = load_data()
 st.write("### Preview of all Scholarships")
 st.dataframe(df)
 
+# Chatbot Logic
+if "messages" not in st.session_state:
+   st.session_state.messages = []
 
 # Extract unique school options from the column
 school_options = sorted(df["School (if specific)"].unique())
@@ -52,9 +55,7 @@ school_options = sorted(df["School (if specific)"].unique())
 selected_school = st.selectbox("Select the school related to your scholarship search:", school_options)
 
 
-# Chatbot Logic
-if "messages" not in st.session_state:
-   st.session_state.messages = []
+
 
 
 # Display chat history

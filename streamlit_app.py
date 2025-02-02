@@ -43,7 +43,7 @@ def load_data():
    df = df.applymap(lambda x: str(x).strip() if isinstance(x, str) else x)
   
    # Replace empty cells in the "School (if specific)" column with "none"
-   df["School (if specific)"] = df["School (if specific)"].fillna("Not School Specific")
+   df["School (if specific)"] = df["School (if specific)"].fillna("Not School specific")
    return df
 
 
@@ -55,11 +55,11 @@ st.dataframe(df)
 
 
 # Extract unique school options from the column
-#school_options = sorted(df["School (if specific)"].unique())
+school_options = sorted(df["School (if specific)"].unique())
 
 
 # Dropdown for school selection
-#selected_school = st.selectbox("Select the school related to your scholarship search:", school_options)
+selected_school = st.selectbox("Select the school related to your scholarship search:", school_options)
 
 
 # Chatbot Logic
@@ -84,8 +84,8 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
 
 
    # Filter data based on selected school
-   #filtered_data = df if selected_school == "none" else df[df["School (if specific)"] == selected_school]
-   filtered_data = df
+   filtered_data = df if selected_school == "none" else df[df["School (if specific)"] == selected_school]
+
 
    # Prepare the prompt for OpenAI API
    prompt = f"""

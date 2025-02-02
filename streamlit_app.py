@@ -145,7 +145,7 @@ def parse_scholarships(response_content):
 
 # Parse response into a structured table
 df_scholarships = parse_scholarships(response_content)
-
+st.dataframe(df_scholarships)
 
 # Display the scholarships table in the required format
 if not df_scholarships.empty:

@@ -2,14 +2,12 @@ import streamlit as st
 import pandas as pd
 import openai
 import os
-import tiktoken  # OpenAI's tokenizer for token counting
 
 # Function to estimate the number of tokens in a string
-def num_tokens_from_string(string: str, model: str = "gpt-4") -> int:
-    """Estimate the number of tokens in a string."""
-    encoding = tiktoken.encoding_for_model(model)
-    return len(encoding.encode(string))
-
+def num_tokens_from_string(string: str) -> int:
+    """Estimate the number of tokens in a string by using a simple heuristic (approx 4 tokens per word)."""
+    # Heuristic: approximate that each word is about 4 tokens in the GPT-4 model
+    return len(string.split()) * 4
 
 st.title("💬 GenOne Scholarship Opportunity Chatbot")
 st.write(
@@ -102,8 +100,8 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
         filtered_data = df[df["School (if specific)"] == selected_school]
 
     # Convert filtered data to string for token estimation
-    full_data_string = filtered_data.to_string(index=False)
-    token_count = num_tokens_from_string(full_data_string)
+    filtered_data_string = filtered_data.to_string(index=False)
+    token_count = num_tokens_from_string(filtered_data_string)
 
     # If tokens exceed 10,000, limit to 20 rows
     if token_count > 10000:

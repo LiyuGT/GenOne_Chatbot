@@ -97,8 +97,9 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
         filtered_data = df[df["School (if specific)"] == selected_school]
 
     # Limit data to reduce token usage (e.g., first 10 rows)
-    filtered_data_small = filtered_data.head(10)
-
+    #filtered_data_small = filtered_data.head(10)
+    filtered_data_small = filtered_data
+    
     # Prepare the prompt for OpenAI API
     prompt = f"""
     ### Objective

@@ -43,7 +43,7 @@ def load_data():
    df = df.applymap(lambda x: str(x).strip() if isinstance(x, str) else x)
   
    # Replace empty cells in the "School (if specific)" column with "none"
-   df["School (if specific)"] = df["School (if specific)"].fillna("Not School specific")
+   df["School (if specific)"] = df["School (if specific)"].fillna("none")
    return df
 
 
@@ -84,7 +84,7 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
 
 
    # Filter data based on selected school
-   filtered_data = df if selected_school == "Not School specific" else df[df["School (if specific)"] == selected_school]
+   filtered_data = df if selected_school == "none" else df[df["School (if specific)"] == selected_school]
 
 
    # Prepare the prompt for OpenAI API
@@ -162,7 +162,8 @@ if not df_scholarships.empty:
    df_scholarships = df_scholarships[["Scholarship Name", "Amount", "Requirements", "Scholarship Website", "Deadline Status"]]
    st.write("### Matching Scholarship Opportunities")
    st.dataframe(df_scholarships)
-
+else:
+   st.write("No scholarships found matching your query.")
 
 
 

@@ -81,77 +81,78 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
    else:
       filtered_data = df[df["School (if specific)"] == selected_school]  # Filter by selected school
 
+# Extract unique school options from the column
+school_options = sorted(df["School (if specific)"].unique())
 
-   # Prepare the prompt for OpenAI API
-   prompt = f"""
-   ### Objective
-   The chatbot assists users in discovering relevant opportunities by querying the provided data. Responses should include:
-   - Relevant details about matching opportunities, including name, website, deadline, requirements, etc.
-   - A user-friendly display, with tables for multiple matches.
-   - ### Table Format Example: | Scholarship Name | Amount | Requirements | Scholarship Website | Deadline Status |
-   - Clarity, friendliness, and professionalism.
-   - Make sure to look through the full data and provide all the matching responses.
+# Dropdown for school selection
+selected_school = st.selectbox("Select the school related to your scholarship search:", school_options)
 
-
-   ### Filtered Table Data
-   {filtered_data.to_string(index=False)}
-
-
-   ### User Query
-   {user_query}
-   """
-
-
-   # Generate Chat Response using the OpenAI client
-   response = client.chat.completions.create(
-   model="gpt-4",
-   messages=[
-       {"role": "system", "content": "You are a helpful student assistant."},
-       {"role": "user", "content": prompt},
-   ],
-   temperature=0.2,
-)
-
-
-# Extract the actual response content safely
-if response and hasattr(response, "choices"):
-    response_content = response.choices[0].message.content
+# Add demographic dropdown only if "none" is selected
+if selected_school == "none":
+    demographic_options = sorted(df["Demographic"].dropna().unique())  # Ensure no NaN values
+    selected_demographic = st.selectbox("Select your demographic group:", ["All"] + demographic_options)
 else:
-    response_content = "No response received from OpenAI."
+    selected_demographic = None  # No demographic filtering when a school is selected
 
+# Wait for the user's query
+if user_query := st.chat_input("What kind of scholarship opportunities are you looking for?"):
 
-# Function to parse response into structured format
-def parse_scholarships(response_content):
-    lines = response_content.strip().split("\n")
-    scholarships = []
+    # Store user message
+    st.session_state.messages.append({"role": "user", "content": user_query})
+    with st.chat_message("user"):
+        st.markdown(user_query)
 
-    for line in lines:
-        parts = line.split("|")
-        if len(parts) >= 5:
-            scholarships.append([p.strip() for p in parts[1:-1]])  # Remove empty parts
+    # Apply school filtering
+    if selected_school == "none":
+        filtered_data = df[df["School (if specific)"] == "none"]
+        
+        # Apply demographic filter if "All" is not selected
+        if selected_demographic and selected_demographic != "All":
+            filtered_data = filtered_data[filtered_data["Demographic"] == selected_demographic]
+    else:
+        filtered_data = df[df["School (if specific)"] == selected_school]
 
-    if scholarships:
-        df_scholarships = pd.DataFrame(scholarships[1:], columns=scholarships[0])  # First row as headers
-        return df_scholarships
-    return pd.DataFrame(columns=["Scholarship Name", "Amount", "Requirements", "Scholarship Website", "Deadline Status"])  # Ensure empty DF has correct headers
+    # Limit data to reduce token usage (e.g., first 10 rows)
+    filtered_data_small = filtered_data.head(10)
 
+    # Prepare the prompt for OpenAI API
+    prompt = f"""
+    ### Objective
+    The chatbot assists users in discovering relevant opportunities by querying the provided data. Responses should include:
+    - Relevant details about matching opportunities, including name, website, deadline, requirements, etc.
+    - A user-friendly display, with tables for multiple matches.
+    - ### Table Format Example: | Scholarship Name | Amount | Requirements | Scholarship Website | Deadline Status |
+    - Clarity, friendliness, and professionalism.
+    - Make sure to look through the full data and provide all the matching responses.
 
+    ### Filtered Table Data (First 10 Results)
+    {filtered_data_small.to_string(index=False)}
 
-# Debug: Show raw response from OpenAI
-#st.write("### OpenAI Response Debug")
-#st.write("##### Response should be in the Choices row, double-click to see")
-#st.text(response_content)  # Display raw text response for debugging
+    ### User Query
+    {user_query}
+    """
 
+    # Generate Chat Response using OpenAI
+    response = client.chat.completions.create(
+        model="gpt-4",
+        messages=[
+            {"role": "system", "content": "You are a helpful student assistant."},
+            {"role": "user", "content": prompt},
+        ],
+        temperature=0.2,
+    )
 
-# Parse response into a structured table
-df_scholarships = parse_scholarships(response_content)
+    # Extract response content safely
+    if response and hasattr(response, "choices"):
+        response_content = response.choices[0].message.content
+    else:
+        response_content = "No response received from OpenAI."
 
-if df_scholarships.empty:
-    st.write("No scholarships found matching your query.")
-else:
-    st.write("### Matching Scholarship Opportunities")
-    st.dataframe(df_scholarships)
+    # Parse response into structured format
+    df_scholarships = parse_scholarships(response_content)
 
-
-
-
+    if df_scholarships.empty:
+        st.write("No scholarships found matching your query.")
+    else:
+        st.write("### Matching Scholarship Opportunities")
+        st.dataframe(df_scholarships)

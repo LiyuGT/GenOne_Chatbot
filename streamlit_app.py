@@ -32,6 +32,7 @@ def load_data():
    # Read the file
    df = pd.read_excel(file_path)
    df = df.applymap(lambda x: str(x).strip() if isinstance(x, str) else x)
+   df["School (if specific)"] = df["School (if specific)"].fillna("none")
    return df
 
 df = load_data()

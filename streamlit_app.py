@@ -1,22 +1,29 @@
-#import libraries
 import streamlit as st
 import pandas as pd
 import openai
 import os
+import tiktoken  # OpenAI's tokenizer for token counting
+
+# Function to estimate the number of tokens in a string
+def num_tokens_from_string(string: str, model: str = "gpt-4") -> int:
+    """Estimate the number of tokens in a string."""
+    encoding = tiktoken.encoding_for_model(model)
+    return len(encoding.encode(string))
+
 
 st.title("💬 GenOne Scholarship Opportunity Chatbot")
 st.write(
-   "This chatbot allows users to query opportunities from a pre-uploaded Excel file. "
-   "It uses OpenAI's GPT-4 model to generate responses. "
+    "This chatbot allows users to query opportunities from a pre-uploaded Excel file. "
+    "It uses OpenAI's GPT-4 model to generate responses. "
 )
 
 # Load the OpenAI API key securely from environment variables
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
 if not openai_api_key:
-   st.error("Please contact Admin for issue associated with missing OpenAI API key.")
+    st.error("Please contact Admin for issue associated with missing OpenAI API key.")
 else:
-   openai.api_key = openai_api_key  # Set OpenAI API key
+    openai.api_key = openai_api_key  # Set OpenAI API key
 
 # OpenAI API client using the provided API key
 client = openai.Client(api_key=openai_api_key)
@@ -24,23 +31,23 @@ client = openai.Client(api_key=openai_api_key)
 # Load the Excel file
 @st.cache_data
 def load_data():
-   file_path = "Scholarships Export for Chatbot.xlsx"  # Ensure the file is uploaded
-   if not os.path.exists(file_path):
-       st.error(f"File not found: {file_path}")
-       st.stop()
+    file_path = "Scholarships Export for Chatbot.xlsx"  # Ensure the file is uploaded
+    if not os.path.exists(file_path):
+        st.error(f"File not found: {file_path}")
+        st.stop()
 
-   # Read the file
-   df = pd.read_excel(file_path)
-   df = df.applymap(lambda x: str(x).strip() if isinstance(x, str) else x)
+    # Read the file
+    df = pd.read_excel(file_path)
+    df = df.applymap(lambda x: str(x).strip() if isinstance(x, str) else x)
 
-   # Replace empty cells in "School (if specific)" with "none"
-   df["School (if specific)"] = df["School (if specific)"].fillna("none")
+    # Replace empty cells in "School (if specific)" with "none"
+    df["School (if specific)"] = df["School (if specific)"].fillna("none")
 
-   # Ensure "Demographic" column exists
-   if "Demographic focus" not in df.columns:
-       df["Demographic focus"] = "Unknown"
+    # Ensure "Demographic" column exists
+    if "Demographic focus" not in df.columns:
+        df["Demographic focus"] = "Unknown"
 
-   return df
+    return df
 
 df = load_data()
 
@@ -66,14 +73,13 @@ if selected_school == "none":
 else:
     selected_demographic = None  # No demographic filtering when a school is selected
 
-
 # Chatbot Logic (stores all previous user messages)
 if "messages" not in st.session_state:
-   st.session_state.messages = []
+    st.session_state.messages = []
 
 for message in st.session_state.messages:
-   with st.chat_message(message["role"]):
-       st.markdown(message["content"])
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
 
 # Set response to none (removes the error)
 response = None
@@ -89,17 +95,25 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
     # Filter data based on selected school
     if selected_school == "none":
         filtered_data = df[df["School (if specific)"] == "none"]
-        
         # Apply demographic filter if "All" is not selected
         if selected_demographic and selected_demographic != "All":
             filtered_data = filtered_data[filtered_data["Demographic focus"] == selected_demographic]
     else:
         filtered_data = df[df["School (if specific)"] == selected_school]
 
-    # Limit data to reduce token usage (e.g., first 10 rows)
-    #filtered_data_small = filtered_data.head(10)
-    filtered_data_small = filtered_data
-    
+    # Convert filtered data to string for token estimation
+    full_data_string = filtered_data.to_string(index=False)
+    token_count = num_tokens_from_string(full_data_string)
+
+    # If tokens exceed 10,000, limit to 20 rows
+    if token_count > 10000:
+        filtered_data = filtered_data.head(20)
+    else:
+        filtered_data = filtered_data  # Use all rows
+
+    # Convert final filtered data to string for OpenAI
+    filtered_data_string = filtered_data.to_string(index=False)
+
     # Prepare the prompt for OpenAI API
     prompt = f"""
     ### Objective
@@ -110,8 +124,8 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
     - Clarity, friendliness, and professionalism.
     - Make sure to look through the full data and provide all the matching responses.
 
-    ### Filtered Table Data (First 10 Results)
-    {filtered_data_small.to_string(index=False)}
+    ### Filtered Table Data
+    {filtered_data_string}
 
     ### User Query
     {user_query}

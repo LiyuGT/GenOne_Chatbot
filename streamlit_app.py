@@ -43,7 +43,7 @@ def load_data():
    df = df.applymap(lambda x: str(x).strip() if isinstance(x, str) else x)
   
    # Replace empty cells in the "School (if specific)" column with "none"
-   df["School (if specific)"] = df["School (if specific)"].fillna("none")
+   df["School (if specific)"] = df["School (if specific)"].fillna("not specific")
    return df
 
 

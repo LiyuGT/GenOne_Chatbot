@@ -36,16 +36,17 @@ def load_data():
 
 df = load_data()
 
-# Allow the user to select a school before querying
-school_options = df["School Name"].dropna().unique().tolist()
-selected_school = st.selectbox("Select Your School", ["All"] + school_options)
-
-# Filter the dataframe based on the selected school
-if selected_school != "All":
-   df = df[df["School Name"] == selected_school]
-
-st.write("### Preview of Matching Scholarships")
+st.write("### Preview of all Scholarships")
 st.dataframe(df)
+
+# Extract unique school options from the column
+school_options = sorted(df["School (if specific)"].unique())
+
+
+# Dropdown for school selection
+selected_school = st.selectbox("Select the school related to your scholarship search:", school_options)
+
+
 
 # Chatbot Logic
 if "messages" not in st.session_state:
@@ -64,6 +65,9 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
    with st.chat_message("user"):
        st.markdown(user_query)
 
+   # Filter data based on selected school
+   filtered_data = df if selected_school == "none" else df[df["School (if specific)"] == selected_school]
+   
    # Prepare the prompt for OpenAI API
    prompt = f"""
    ### Objective
@@ -73,8 +77,8 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
    - Clarity, friendliness, and professionalism.
    - Make sure to look through the full data and provide all the matching responses.
 
-   ### Filtered Scholarship Data
-   {df.to_string(index=False)}
+   ### Filtered Table Data
+   {filtered_data.to_string(index=False)}
 
    ### User Query
    {user_query}
@@ -84,7 +88,7 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
    response = client.chat.completions.create(
    model="gpt-4",
    messages=[
-       {"role": "system", "content": "You are a helpful assistant."},
+       {"role": "system", "content": "You are a helpful student assistant."},
        {"role": "user", "content": prompt},
    ],
    temperature=0.2,
@@ -116,7 +120,7 @@ def parse_scholarships(response_content):
 
 # Debug: Show raw response from OpenAI
 st.write("### OpenAI Response Debug")
-st.write("##### Response should be in the Choices row, double-click to see")
+# st.write("##### Response should be in the Choices row, double-click to see")
 st.text(response_content)  # Display raw text response for debugging
 
 # Parse response into a structured table

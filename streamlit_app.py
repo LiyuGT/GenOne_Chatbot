@@ -3,7 +3,6 @@ import streamlit as st
 import pandas as pd
 import openai
 import os
-import io
 
 st.title("💬 GenOne Scholarship Opportunity Chatbot")
 st.write(
@@ -25,7 +24,7 @@ client = openai.Client(api_key=openai_api_key)
 # Load the Excel file
 @st.cache_data
 def load_data():
-   file_path = "Scholarships Export for Chatbot.xlsx"  # File uploaded in the same directory
+   file_path = "Scholarships Export for Chatbot.xlsx"  # Ensure the file is uploaded
    if not os.path.exists(file_path):
        st.error(f"File not found: {file_path}")
        st.stop()
@@ -33,53 +32,20 @@ def load_data():
    # Read the file
    df = pd.read_excel(file_path)
    df = df.applymap(lambda x: str(x).strip() if isinstance(x, str) else x)
-   # Replace empty cells in the "School (if specific)" column with "none"
-   df["School (if specific)"] = df["School (if specific)"].fillna("none")
-   return df
 
+   # Replace empty cells in "School (if specific)" with "none"
+   df["School (if specific)"] = df["School (if specific)"].fillna("none")
+
+   # Ensure "Demographic" column exists
+   if "Demographic" not in df.columns:
+       df["Demographic"] = "Unknown"
+
+   return df
 
 df = load_data()
 
-
 st.write("### Preview of all Scholarships")
 st.dataframe(df)
-
-
-# Extract unique school options from the column
-school_options = sorted(df["School (if specific)"].unique())
-
-
-# Dropdown for school selection
-selected_school = st.selectbox("Select the school related to your scholarship search:", school_options)
-
-
-# Chatbot Logic (sores all previous user messages)
-if "messages" not in st.session_state:
-   st.session_state.messages = []
-
-for message in st.session_state.messages:
-   with st.chat_message(message["role"]):
-       st.markdown(message["content"])
-
-# set response to none (removes the error)
-response = None
-
-# Wait for the user's query
-if user_query := st.chat_input("What kind of scholarship opportunities are you looking for?"):
-
-
-   # Add the user query to the session state
-   st.session_state.messages.append({"role": "user", "content": user_query})
-   with st.chat_message("user"):
-       st.markdown(user_query)
-
-
-   # Filter data based on selected school
-   #filtered_data = df if selected_school == "none" else df[df["School (if specific)"] == selected_school]
-   if selected_school == "none":
-      filtered_data = df[df["School (if specific)"] == "none"]  # Only select rows where school is "none"
-   else:
-      filtered_data = df[df["School (if specific)"] == selected_school]  # Filter by selected school
 
 # Extract unique school options from the column
 school_options = sorted(df["School (if specific)"].unique())
@@ -94,15 +60,26 @@ if selected_school == "none":
 else:
     selected_demographic = None  # No demographic filtering when a school is selected
 
+# Chatbot Logic (stores all previous user messages)
+if "messages" not in st.session_state:
+   st.session_state.messages = []
+
+for message in st.session_state.messages:
+   with st.chat_message(message["role"]):
+       st.markdown(message["content"])
+
+# Set response to none (removes the error)
+response = None
+
 # Wait for the user's query
 if user_query := st.chat_input("What kind of scholarship opportunities are you looking for?"):
 
-    # Store user message
+    # Add the user query to the session state
     st.session_state.messages.append({"role": "user", "content": user_query})
     with st.chat_message("user"):
         st.markdown(user_query)
 
-    # Apply school filtering
+    # Filter data based on selected school
     if selected_school == "none":
         filtered_data = df[df["School (if specific)"] == "none"]
         
@@ -148,7 +125,22 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
     else:
         response_content = "No response received from OpenAI."
 
-    # Parse response into structured format
+    # Function to parse response into structured format
+    def parse_scholarships(response_content):
+        lines = response_content.strip().split("\n")
+        scholarships = []
+
+        for line in lines:
+            parts = line.split("|")
+            if len(parts) >= 5:
+                scholarships.append([p.strip() for p in parts[1:-1]])  # Remove empty parts
+
+        if scholarships:
+            df_scholarships = pd.DataFrame(scholarships[1:], columns=scholarships[0])  # First row as headers
+            return df_scholarships
+        return pd.DataFrame(columns=["Scholarship Name", "Amount", "Requirements", "Scholarship Website", "Deadline Status"])  # Ensure empty DF has correct headers
+
+    # Parse response into a structured table
     df_scholarships = parse_scholarships(response_content)
 
     if df_scholarships.empty:

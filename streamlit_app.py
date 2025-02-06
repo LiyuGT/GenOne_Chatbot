@@ -11,39 +11,34 @@ TABLE_NAME = "Scholarships (LIST)-All Scholarship by due date"
 
 # Function to estimate the number of tokens in a string
 def num_tokens_from_string(string: str) -> int:
-   """Estimate the number of tokens in a string by using a simple heuristic (approx 4 tokens per word)."""
-   # Heuristic: approximate that each word is about 4 tokens in the GPT-4 model
-   return len(string.split()) * 4
-
+    """Estimate the number of tokens in a string by using a simple heuristic (approx 4 tokens per word)."""
+    return len(string.split()) * 4  # Heuristic: Approx 4 tokens per word
 
 st.title("💬 GenOne Scholarship Opportunity Chatbot")
 st.write(
-   "This chatbot allows users to query opportunities from a pre-uploaded Excel file. "
-   "It uses OpenAI's GPT-4 model to generate responses. "
+    "This chatbot allows users to query opportunities from Airtable. "
+    "It uses OpenAI's GPT-4 model to generate responses."
 )
-
 
 # Load the OpenAI API key securely from environment variables
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
-
 if not openai_api_key:
-   st.error("Please contact Admin for issue associated with missing OpenAI API key.")
+    st.error("Please contact Admin for issue associated with missing OpenAI API key.")
 else:
-   openai.api_key = openai_api_key  # Set OpenAI API key
-
+    openai.api_key = openai_api_key  # Set OpenAI API key
 
 # OpenAI API client using the provided API key
 client = openai.Client(api_key=openai_api_key)
 
-
-# Load the Excel file
+# Load data from Airtable
 @st.cache_data
 def load_data():
-   if not AIRTABLE_API_KEY:
+    if not AIRTABLE_API_KEY:
         st.error("Missing Airtable API key. Please contact Admin.")
         st.stop()
 
+    # Corrected indentation
     table = Table(AIRTABLE_API_KEY, BASE_ID, TABLE_NAME)
     records = table.all()
 
@@ -56,15 +51,13 @@ def load_data():
     df["School (if specific)"] = df["School (if specific)"].fillna("none")
     df["Demographic focus"] = df.get("Demographic focus", "Unknown")
 
-
-   return df
-
+    return df  # Fixed indentation here
 
 df = load_data()
 
-
 st.write("### Preview of all Scholarships")
 st.dataframe(df)
+
 
 
 # Extract unique school options from the column

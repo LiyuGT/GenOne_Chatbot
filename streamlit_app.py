@@ -3,9 +3,10 @@ import pandas as pd
 import openai
 import os
 from pyairtable import Table
+from pyairtable import Api
 
 # Airtable credentials
-AIRTABLE_API_KEY = os.getenv("AIRTABLE_API_KEY")  # Store API key securely
+AIRTABLE_PERSONAL_TOKEN = os.getenv("AIRTABLE_PERSONAL_TOKEN")  # Store securely in environment variables
 BASE_ID = "appT6A7hwVgEpbGPR"
 TABLE_NAME = "Scholarships (LIST)-All Scholarship by due date"
 
@@ -34,14 +35,17 @@ client = openai.Client(api_key=openai_api_key)
 # Load data from Airtable
 @st.cache_data
 def load_data():
-    if not AIRTABLE_API_KEY:
-        st.error("Missing Airtable API key. Please contact Admin.")
+    if not AIRTABLE_PERSONAL_TOKEN:
+        st.error("Missing Airtable personal token. Please contact Admin.")
         st.stop()
 
-    # Corrected indentation
-    table = Table(AIRTABLE_API_KEY, BASE_ID, TABLE_NAME)
+    # Authenticate using the personal token
+    api = Api(AIRTABLE_PERSONAL_TOKEN)
+    table = api.table(BASE_ID, TABLE_NAME)
+    
+    # Fetch records
     records = table.all()
-
+    
     # Convert Airtable records to DataFrame
     data = [record["fields"] for record in records]
     df = pd.DataFrame(data)
@@ -51,13 +55,11 @@ def load_data():
     df["School (if specific)"] = df["School (if specific)"].fillna("none")
     df["Demographic focus"] = df.get("Demographic focus", "Unknown")
 
-    return df  # Fixed indentation here
+    return df
 
 df = load_data()
-
 st.write("### Preview of all Scholarships")
 st.dataframe(df)
-
 
 
 # Extract unique school options from the column

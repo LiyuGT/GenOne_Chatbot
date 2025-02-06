@@ -2,7 +2,12 @@ import streamlit as st
 import pandas as pd
 import openai
 import os
+from pyairtable import Table
 
+# Airtable credentials
+AIRTABLE_API_KEY = os.getenv("AIRTABLE_API_KEY")  # Store API key securely
+BASE_ID = "appT6A7hwVgEpbGPR"
+TABLE_NAME = "Scholarships (LIST)-All Scholarship by due date"
 
 # Function to estimate the number of tokens in a string
 def num_tokens_from_string(string: str) -> int:
@@ -35,24 +40,21 @@ client = openai.Client(api_key=openai_api_key)
 # Load the Excel file
 @st.cache_data
 def load_data():
-   file_path = "Scholarships Export for Chatbot.xlsx"  # Ensure the file is uploaded
-   if not os.path.exists(file_path):
-       st.error(f"File not found: {file_path}")
-       st.stop()
+   if not AIRTABLE_API_KEY:
+        st.error("Missing Airtable API key. Please contact Admin.")
+        st.stop()
 
+    table = Table(AIRTABLE_API_KEY, BASE_ID, TABLE_NAME)
+    records = table.all()
 
-   # Read the file
-   df = pd.read_excel(file_path)
-   df = df.applymap(lambda x: str(x).strip() if isinstance(x, str) else x)
+    # Convert Airtable records to DataFrame
+    data = [record["fields"] for record in records]
+    df = pd.DataFrame(data)
 
-
-   # Replace empty cells in "School (if specific)" with "none"
-   df["School (if specific)"] = df["School (if specific)"].fillna("none")
-
-
-   # Ensure "Demographic" column exists
-   if "Demographic focus" not in df.columns:
-       df["Demographic focus"] = "Unknown"
+    # Clean and preprocess data
+    df = df.applymap(lambda x: str(x).strip() if isinstance(x, str) else x)
+    df["School (if specific)"] = df["School (if specific)"].fillna("none")
+    df["Demographic focus"] = df.get("Demographic focus", "Unknown")
 
 
    return df

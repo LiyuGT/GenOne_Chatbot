@@ -18,7 +18,7 @@ def num_tokens_from_string(string: str) -> int:
 # Add a logo at the top of the page
 st.image("GenOneLogo.png", width=300)  # Adjust width as needed
 
-st.title("💬 GenOne Scholarship Opportunity Chatbot")
+st.title("💬Scholarship Opportunity Chatbot")
 st.write(
     "This chatbot allows users to query opportunities from Airtable. "
     "It uses OpenAI's GPT-4 model to generate responses."

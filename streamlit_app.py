@@ -15,6 +15,9 @@ def num_tokens_from_string(string: str) -> int:
     """Estimate the number of tokens in a string by using a simple heuristic (approx 4 tokens per word)."""
     return len(string.split()) * 4  # Heuristic: Approx 4 tokens per word
 
+# Add a logo at the top of the page
+st.image("GenOneLogo.png", width=200)  # Adjust width as needed
+
 st.title("💬 GenOne Scholarship Opportunity Chatbot")
 st.write(
     "This chatbot allows users to query opportunities from Airtable. "

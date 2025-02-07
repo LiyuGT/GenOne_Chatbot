@@ -179,7 +179,7 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
 
   # If tokens exceed 10,000, limit to 20 rows
   if token_count > 10000:
-      filtered_data = filtered_data.head(20)
+      filtered_data = filtered_data.head(15)
   else:
       filtered_data = filtered_data  # Use all rows
 

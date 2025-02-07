@@ -50,6 +50,14 @@ def load_data():
     data = [record["fields"] for record in records]
     df = pd.DataFrame(data)
 
+    if not data:
+        return pd.DataFrame()  # Return empty DataFrame if no data found
+
+    # Preserve the original column order
+    column_order = list(data[0].keys())  # Extract column order from the first record
+    df = pd.DataFrame(data, columns=column_order)
+
+
     # Clean and preprocess data
     df = df.applymap(lambda x: str(x).strip() if isinstance(x, str) else x)
     df["School (if specific)"] = df["School (if specific)"].fillna("none")

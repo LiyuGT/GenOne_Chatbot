@@ -27,7 +27,7 @@ st.markdown(
         }
     </style>
     <div class="center">
-        <img src="logo.png" width="200">
+        <img src="GenOneLogo.png" width="200">
         <h1>💬 GenOne Scholarship Opportunity Chatbot</h1>
     </div>
     """,

@@ -15,10 +15,25 @@ def num_tokens_from_string(string: str) -> int:
     """Estimate the number of tokens in a string by using a simple heuristic (approx 4 tokens per word)."""
     return len(string.split()) * 4  # Heuristic: Approx 4 tokens per word
 
-# Add a logo at the top of the page
-st.image("GenOneLogo.png", width=200)  # Adjust width as needed
+# Center the logo and title using custom HTML & CSS
+st.markdown(
+    """
+    <style>
+        .center {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
+    <div class="center">
+        <img src="logo.png" width="200">
+        <h1>💬 GenOne Scholarship Opportunity Chatbot</h1>
+    </div>
+    """,
+    unsafe_allow_html=True
+)
 
-st.title("💬 GenOne Scholarship Opportunity Chatbot")
 st.write(
     "This chatbot allows users to query opportunities from Airtable. "
     "It uses OpenAI's GPT-4 model to generate responses."

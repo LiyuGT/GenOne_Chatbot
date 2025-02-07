@@ -2,73 +2,89 @@ import streamlit as st
 import pandas as pd
 import openai
 import os
-from pyairtable import Table
-from pyairtable import Api
 
 
-# Airtable credentials
-AIRTABLE_PERSONAL_TOKEN = os.getenv("AIRTABLE_PERSONAL_TOKEN")  # Store securely in environment variables
-BASE_ID = "appT6A7hwVgEpbGPR"
-TABLE_NAME = "Scholarships (LIST)-All Scholarship by due date"
 
 
 # Function to estimate the number of tokens in a string
 def num_tokens_from_string(string: str) -> int:
-   """Estimate the number of tokens in a string by using a simple heuristic (approx 4 tokens per word)."""
-   return len(string.split()) * 4  # Heuristic: Approx 4 tokens per word
+  """Estimate the number of tokens in a string by using a simple heuristic (approx 4 tokens per word)."""
+  # Heuristic: approximate that each word is about 4 tokens in the GPT-4 model
+  return len(string.split()) * 4
+
+
 
 
 st.title("💬 GenOne Scholarship Opportunity Chatbot")
 st.write(
-   "This chatbot allows users to query opportunities from Airtable. "
-   "It uses OpenAI's GPT-4 model to generate responses."
+  "This chatbot allows users to query opportunities from a pre-uploaded Excel file. "
+  "It uses OpenAI's GPT-4 model to generate responses. "
 )
+
+
 
 
 # Load the OpenAI API key securely from environment variables
 openai_api_key = os.getenv("OPENAI_API_KEY")
 
 
+
+
 if not openai_api_key:
-   st.error("Please contact Admin for issue associated with missing OpenAI API key.")
+  st.error("Please contact Admin for issue associated with missing OpenAI API key.")
 else:
-   openai.api_key = openai_api_key  # Set OpenAI API key
+  openai.api_key = openai_api_key  # Set OpenAI API key
+
+
 
 
 # OpenAI API client using the provided API key
 client = openai.Client(api_key=openai_api_key)
 
 
-# Load data from Airtable
+
+
+# Load the Excel file
 @st.cache_data
 def load_data():
-   if not AIRTABLE_PERSONAL_TOKEN:
-       st.error("Missing Airtable personal token. Please contact Admin.")
-       st.stop()
+  file_path = "Scholarships Export for Chatbot.xlsx"  # Ensure the file is uploaded
+  if not os.path.exists(file_path):
+      st.error(f"File not found: {file_path}")
+      st.stop()
 
 
-   # Authenticate using the personal token
-   api = Api(AIRTABLE_PERSONAL_TOKEN)
-   table = api.table(BASE_ID, TABLE_NAME)
-  
-   # Fetch records
-   records = table.all()
-  
-   # Convert Airtable records to DataFrame
-   data = [record["fields"] for record in records]
-   df = pd.DataFrame(data)
 
 
-   # Clean and preprocess data
-   df = df.applymap(lambda x: str(x).strip() if isinstance(x, str) else x)
-   df["School (if specific)"] = df["School (if specific)"].fillna("none")
-   df["Demographic focus"] = df.get("Demographic focus", "Unknown")
+  # Read the file
+  df = pd.read_excel(file_path)
+  df = df.applymap(lambda x: str(x).strip() if isinstance(x, str) else x)
 
 
-   return df
+
+
+  # Replace empty cells in "School (if specific)" with "none"
+  df["School (if specific)"] = df["School (if specific)"].fillna("none")
+
+
+
+
+  # Ensure "Demographic" column exists
+  if "Demographic focus" not in df.columns:
+      df["Demographic focus"] = "Unknown"
+
+
+
+
+  return df
+
+
 
 
 df = load_data()
+
+
+
+
 st.write("### Preview of all Scholarships")
 st.dataframe(df)
 

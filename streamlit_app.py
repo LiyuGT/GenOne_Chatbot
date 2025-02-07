@@ -186,21 +186,26 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
 
 
    # Function to parse response into structured format
+   
    def parse_scholarships(response_content):
-       lines = response_content.strip().split("\n")
-       scholarships = []
+        lines = response_content.strip().split("\n")
+        scholarships = []
 
+        for line in lines:
+            parts = line.split("|")
+            if len(parts) >= 5:
+                scholarships.append([p.strip() for p in parts[1:-1]])  # Remove empty parts
 
-       for line in lines:
-           parts = line.split("|")
-           if len(parts) >= 5:
-               scholarships.append([p.strip() for p in parts[1:-1]])  # Remove empty parts
+        if scholarships:
+            df_scholarships = pd.DataFrame(scholarships[1:], columns=scholarships[0])  # First row as headers
+            
+            # **Filter out rows where "Scholarship Name" is just dashes**
+            df_scholarships = df_scholarships[df_scholarships["Scholarship Name"] != "----------------"]
 
+            return df_scholarships
+        
+        return pd.DataFrame(columns=["Scholarship Name", "Amount", "Requirements", "Scholarship Website", "Deadline Status"])  # Ensure empty DF has correct headers
 
-       if scholarships:
-           df_scholarships = pd.DataFrame(scholarships[1:], columns=scholarships[0])  # First row as headers
-           return df_scholarships
-       return pd.DataFrame(columns=["Scholarship Name", "Amount", "Requirements", "Scholarship Website", "Deadline Status"])  # Ensure empty DF has correct headers
 
 
    # Parse response into a structured table

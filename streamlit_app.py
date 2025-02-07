@@ -186,7 +186,7 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
 
 
    # Function to parse response into structured format
-   
+ 
    def parse_scholarships(response_content):
         lines = response_content.strip().split("\n")
         scholarships = []
@@ -199,8 +199,8 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
         if scholarships:
             df_scholarships = pd.DataFrame(scholarships[1:], columns=scholarships[0])  # First row as headers
             
-            # **Filter out rows where "Scholarship Name" is just dashes**
-            df_scholarships = df_scholarships[df_scholarships["Scholarship Name"] != "----------------"]
+            # **Drop the first row (automatic response row)**
+            df_scholarships = df_scholarships.iloc[1:].reset_index(drop=True)
 
             return df_scholarships
         

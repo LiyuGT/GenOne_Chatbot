@@ -81,7 +81,7 @@ def load_data():
    # Clean and preprocess data
    df = df.applymap(lambda x: str(x).strip() if isinstance(x, str) else x)
    df["School (if specific)"] = df["School (if specific)"].fillna("none")
-   #df["Demographic focus"] = df.get("Demographic focus", "Unknown")
+   df["Demographic focus"] = df.get("Demographic focus", "Unknown")
 
 
    return df

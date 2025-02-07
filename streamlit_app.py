@@ -57,6 +57,10 @@ def load_data():
     column_order = list(data[0].keys())  # Extract column order from the first record
     df = pd.DataFrame(data, columns=column_order)
 
+    # Ensure "Scholarship Name" is the first column
+    if "Scholarship Name" in df.columns:
+        cols = ["Scholarship Name"] + [col for col in df.columns if col != "Scholarship Name"]
+        df = df[cols]
 
     # Clean and preprocess data
     df = df.applymap(lambda x: str(x).strip() if isinstance(x, str) else x)

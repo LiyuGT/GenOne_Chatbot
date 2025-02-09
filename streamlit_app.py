@@ -151,8 +151,10 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
         temperature=0.2,
     )
 
-    response_content = response.choices[0].message.content if response and hasattr(response, "choices") else "No response received from OpenAI."
+    df_scholarships = parse_scholarships(response.choices[0].message.content)
 
-    if response_content:
+    if df_scholarships.empty:
+        st.write("No scholarships found matching your query.")
+    else:
         st.write("### Matching Scholarship Opportunities")
-        st.text(response_content)
+        st.dataframe(df_scholarships)

@@ -127,7 +127,7 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
     The chatbot assists users in discovering relevant opportunities by querying the provided data. Responses should include:
     - Relevant details about matching opportunities, including name, website, deadline, requirements, etc.
     - A user-friendly display, with tables for multiple matches.
-    - ### Table Format Example: | Scholarship Name | Amount | Requirements | Scholarship Website | Deadline Status |
+    - ### Table Format Example: | Scholarship Name | Amount | Requirements | Minimum GPA | Scholarship Website | Deadline Status | School (if specific) | Demographic focus | Notes | 
     - Clarity, friendliness, and professionalism.
     - Make sure to look through the full data and provide all the matching responses.
 

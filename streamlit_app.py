@@ -4,6 +4,7 @@ import openai
 import os
 from pyairtable import Table
 from pyairtable import Api
+from datetime import datetime
 
 # Airtable credentials
 AIRTABLE_PERSONAL_TOKEN = os.getenv("AIRTABLE_PERSONAL_TOKEN")  # Store securely in environment variables
@@ -63,6 +64,14 @@ def load_data():
     if "Scholarship Name" in df.columns:
         cols = ["Scholarship Name"] + [col for col in df.columns if col != "Scholarship Name"]
         df = df[cols]
+
+    # Convert "Deadline this year" to datetime and filter out past deadlines
+    if "Deadline this year" in df.columns:
+        df["Deadline this year"] = pd.to_datetime(df["Deadline this year"], errors="coerce")
+
+        # Keep records where deadline is either in the future or missing
+        today = datetime.today()
+        df = df[(df["Deadline this year"].isna()) | (df["Deadline this year"] >= today)]
 
     # Clean and preprocess data
     df = df.applymap(lambda x: str(x).strip() if isinstance(x, str) else x)

@@ -81,8 +81,11 @@ def load_data():
    # Clean and preprocess data
    df = df.applymap(lambda x: str(x).strip() if isinstance(x, str) else x)
    df["School (if specific)"] = df["School (if specific)"].fillna("none")
-   if "Demographic focus" not in df.columns:
+   if "Demographic focus" in df.columns:
+    df["Demographic focus"] = df["Demographic focus"].fillna("Unknown")
+   else:
     df["Demographic focus"] = "Unknown"
+
 
 
 

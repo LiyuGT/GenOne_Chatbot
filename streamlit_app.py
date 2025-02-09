@@ -153,3 +153,13 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
     if response_content:
         st.write("### Matching Scholarship Opportunities")
         st.write(response_content)
+
+    # Feature to download filtered results as CSV
+    if not filtered_data.empty:
+        csv = filtered_data.to_csv(index=False).encode("utf-8")
+        st.download_button(
+            label="📥 Download Results as CSV",
+            data=csv,
+            file_name="filtered_scholarships.csv",
+            mime="text/csv",
+        )

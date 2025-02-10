@@ -118,12 +118,12 @@ else:
 filtered_data = df.copy()  # Keep raw data if no filtering
 
 if selected_school is "All (No Filter)":  # Apply school filter if not "All (No Filter)"
-    filtered_data
+    filtered_data = filtered_data
 else:
     filtered_data = filtered_data[filtered_data["School (if specific)"] == selected_school]
 
 if selected_demographic is "All (No Filter)":  # Apply demographic filter if selected
-    filtered_data
+    filtered_data = filtered_data
 else:
     filtered_data = filtered_data[filtered_data["Demographic focus"] == selected_demographic]
 

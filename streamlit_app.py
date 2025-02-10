@@ -94,16 +94,31 @@ st.dataframe(df)
 # Extract unique school options from the column
 school_options = sorted(df["School (if specific)"].unique())
 
-# Dropdown for school selection
-selected_school = st.selectbox("Select the school related to your scholarship search:", school_options)
+
+
+# Dropdown for school selection (with an option to not select anything)
+selected_school = st.selectbox("Select the school related to your scholarship search (leave empty for all):", ["All"] + school_options)
 
 # Add demographic dropdown only if "All" is selected
 if selected_school == "All":
     df["Demographic focus"] = df["Demographic focus"].fillna("All")
     demographic_options = sorted(df["Demographic focus"].unique())
-    selected_demographic = st.selectbox("Select your demographic group:", demographic_options)
+    selected_demographic = st.selectbox("Select your demographic group (leave empty for all):", ["All"] + demographic_options)
 else:
     selected_demographic = None
+
+# Apply filters based on selection (if any)
+filtered_data = df  # Default to all data
+
+if selected_school != "All":  # Apply school filter if a specific school is selected
+    filtered_data = df[df["School (if specific)"] == selected_school]
+
+if selected_demographic and selected_demographic != "All":  # Apply demographic filter if selected
+    filtered_data = filtered_data[filtered_data["Demographic focus"] == selected_demographic]
+
+
+
+
 
 # Chatbot Logic (stores all previous user messages)
 if "messages" not in st.session_state:

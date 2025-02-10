@@ -165,12 +165,20 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
         st.write("### Matching Scholarship Opportunities")
         st.write(response_content)
 
-    # Feature to download filtered results as CSV
     if not filtered_data.empty:
-        csv = filtered_data.to_csv(index=False).encode("utf-8")
-        st.download_button(
-            label="📥 Download Results as CSV",
-            data=csv,
-            file_name="filtered_scholarships.csv",
-            mime="text/csv",
-        )
+    # Convert response to a DataFrame
+        response_df = pd.DataFrame({"Chatbot Response": [response_content]})
+    
+    # Concatenate response with filtered data
+    csv_data = pd.concat([filtered_data, response_df], ignore_index=True)
+
+    # Convert to CSV
+    csv = csv_data.to_csv(index=False).encode("utf-8")
+
+    st.download_button(
+        label="📥 Download Results as CSV",
+        data=csv,
+        file_name="filtered_scholarships.csv",
+        mime="text/csv",
+    )
+

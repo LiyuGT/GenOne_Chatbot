@@ -86,17 +86,11 @@ def load_data():
 
     return df
 
-
 df = load_data()
 st.write("### Preview of all Scholarships")
 st.dataframe(df)
 
 # Extract unique school options from the column
-school_options = sorted(df["School (if specific)"].unique())
-
-
-
-# Dropdown for school selection (default to "All (No Filter)")
 school_options = sorted(df["School (if specific)"].fillna("All").unique())  # Fill NaN with "All"
 selected_school = st.selectbox(
     "Select the school related to your scholarship search (leave as 'All (No Filter)' for all):",
@@ -104,33 +98,22 @@ selected_school = st.selectbox(
 )
 
 # Add demographic dropdown only if "All (No Filter)" is not selected
-if selected_school in ["All", "All (No Filter)"]:
-    df["Demographic focus"] = df["Demographic focus"].fillna("All")  # Fill NaN with "All"
-    demographic_options = sorted(df["Demographic focus"].unique())
-    selected_demographic = st.selectbox(
-        "Select your demographic group (leave as 'All (No Filter)' for all):",
-        ["All (No Filter)"] + demographic_options  # Add "All (No Filter)" option
-    )
-else:
-    selected_demographic = None
+df["Demographic focus"] = df["Demographic focus"].fillna("All")  # Fill NaN with "All"
+demographic_options = sorted(df["Demographic focus"].unique())
+selected_demographic = st.selectbox(
+    "Select your demographic group (leave as 'All (No Filter)' for all):",
+    ["All (No Filter)"] + demographic_options  # Add "All (No Filter)" option
+)
 
 # Default to all data if "All (No Filter)" is selected
-filtered_data = df.copy()  # Keep raw data if no filtering
+filtered_data = df.copy()
 
-if selected_school is "All (No Filter)":  # Apply school filter if not "All (No Filter)"
-    filtered_data = filtered_data
-else:
+# Apply filters only if a specific selection is made
+if selected_school != "All (No Filter)":
     filtered_data = filtered_data[filtered_data["School (if specific)"] == selected_school]
 
-if selected_demographic is "All (No Filter)":  # Apply demographic filter if selected
-    filtered_data = filtered_data
-else:
+if selected_demographic != "All (No Filter)":
     filtered_data = filtered_data[filtered_data["Demographic focus"] == selected_demographic]
-
-
-
-
-
 
 # Chatbot Logic (stores all previous user messages)
 if "messages" not in st.session_state:
@@ -142,24 +125,9 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
     with st.chat_message("user"):
         st.markdown(user_query)
 
-    # Filter data based on selected school
-    if selected_school == "All":
-        filtered_data = df[df["School (if specific)"] == "All"]
-        if selected_demographic and selected_demographic != "All":
-            filtered_data = filtered_data[filtered_data["Demographic focus"] == selected_demographic]
-    else:
-        filtered_data = df[df["School (if specific)"] == selected_school]
-
     # Convert filtered data to string for token estimation
     filtered_data_string = filtered_data.to_string(index=False)
     token_count = num_tokens_from_string(filtered_data_string)
-
-    # If tokens exceed 10,000, limit to 20 rows
-    #if token_count > 10000:
-        #filtered_data = filtered_data.head(15)
-
-    # Convert final filtered data to string for OpenAI
-    filtered_data_string = filtered_data.to_string(index=False)
 
     # Prepare the prompt for OpenAI API
     prompt = f"""
@@ -167,7 +135,6 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
     The chatbot assists users in discovering relevant opportunities by querying the provided data. Responses should include:
     - Relevant details about matching opportunities, including name, website, deadline, requirements, etc.
     - A user-friendly display, with tables for multiple matches.
-    - ### Table Format Example: | Scholarship Name | Amount | Requirements | Minimum GPA | Scholarship Website | Deadline Status | Deadline this year | School (if specific) | Demographic focus | Notes | 
     - Clarity, friendliness, and professionalism.
     - Make sure to look through the full data and provide all the matching responses.
 
@@ -193,39 +160,3 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
     if response_content:
         st.write("### Matching Scholarship Opportunities")
         st.write(response_content)
-
-
-
-    if response_content:
-        # Parse response into structured format (assuming response contains a table)
-        response_lines = response_content.split("\n")  # Split response by new lines
-        structured_data = []
-
-        for line in response_lines:
-            fields = [field.strip() for field in line.split("|")]  # Split by '|' and clean whitespace
-            if len(fields) > 1:  # Ensure it's not an empty line or header
-                structured_data.append(fields)
-
-        # Convert structured data to DataFrame
-        if structured_data:
-            # Extract headers and data
-            headers = structured_data[0]  # Assuming first row contains headers
-            rows = structured_data[1:]  # The rest are actual data
-
-            # Create DataFrame
-            response_df = pd.DataFrame(rows, columns=headers)
-
-            # Convert DataFrame to CSV format
-            csv_buffer = io.StringIO()
-            response_df.to_csv(csv_buffer, index=False)
-
-            # Convert to downloadable file
-            st.download_button(
-                label="📥 Download Chatbot Response as CSV",
-                data=csv_buffer.getvalue().encode("utf-8"),
-                file_name="chatbot_response.csv",
-                mime="text/csv",
-            )
-
-
-

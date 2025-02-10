@@ -5,6 +5,8 @@ import os
 from pyairtable import Table
 from pyairtable import Api
 from datetime import datetime
+import csv
+import io
 
 # Airtable credentials
 AIRTABLE_PERSONAL_TOKEN = os.getenv("AIRTABLE_PERSONAL_TOKEN")  # Store securely in environment variables

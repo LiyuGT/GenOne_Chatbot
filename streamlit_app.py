@@ -8,6 +8,8 @@ from datetime import datetime
 import csv
 import io
 
+st.set_page_config(layout="wide")
+
 # Airtable credentials
 AIRTABLE_PERSONAL_TOKEN = os.getenv("AIRTABLE_PERSONAL_TOKEN")  # Store securely in environment variables
 BASE_ID = "appT6A7hwVgEpbGPR"
@@ -23,8 +25,9 @@ st.image("GenOneLogo.png", width=300)  # Adjust width as needed
 
 st.title("💬Scholarship Opportunity Chatbot")
 st.write(
-    "This chatbot allows users to query opportunities from Airtable. "
-    "It uses OpenAI's GPT-4 model to generate responses."
+    "This chatbot allows you to query scholarship opportunities compiled by GenOne. "
+    "Feel free to fiter by school/demographic (optional)."
+    "You can download your results for future reference"
 )
 
 # Load the OpenAI API key securely from environment variables

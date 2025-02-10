@@ -36,8 +36,9 @@ else:
 # OpenAI API client using the provided API key
 client = openai.Client(api_key=openai_api_key)
 
+
 # Load data from Airtable
-@st.cache_data
+@st.cache_data(ttl=60)  # Cache data for only 60 seconds
 def load_data():
     if not AIRTABLE_PERSONAL_TOKEN:
         st.error("Missing Airtable personal token. Please contact Admin.")
@@ -82,6 +83,7 @@ def load_data():
         df["Demographic focus"] = "Unknown"
 
     return df
+
 
 df = load_data()
 st.write("### Preview of all Scholarships")

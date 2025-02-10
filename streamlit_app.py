@@ -96,25 +96,33 @@ school_options = sorted(df["School (if specific)"].unique())
 
 
 
-# Dropdown for school selection (with an option to not select anything)
-selected_school = st.selectbox("Select the school related to your scholarship search (leave empty for all):", ["All"] + school_options)
+# Dropdown for school selection (default to "All (No Filter)")
+school_options = sorted(df["School (if specific)"].fillna("All").unique())  # Fill NaN with "All"
+selected_school = st.selectbox(
+    "Select the school related to your scholarship search (leave as 'All (No Filter)' for all):",
+    ["All (No Filter)"] + school_options  # Add "All (No Filter)" option
+)
 
-# Add demographic dropdown only if "All" is selected
-if selected_school == "All":
-    df["Demographic focus"] = df["Demographic focus"].fillna("All")
+# Add demographic dropdown only if "All (No Filter)" is not selected
+if selected_school in ["All", "All (No Filter)"]:
+    df["Demographic focus"] = df["Demographic focus"].fillna("All")  # Fill NaN with "All"
     demographic_options = sorted(df["Demographic focus"].unique())
-    selected_demographic = st.selectbox("Select your demographic group (leave empty for all):", ["All"] + demographic_options)
+    selected_demographic = st.selectbox(
+        "Select your demographic group (leave as 'All (No Filter)' for all):",
+        ["All (No Filter)"] + demographic_options  # Add "All (No Filter)" option
+    )
 else:
     selected_demographic = None
 
-# Apply filters based on selection (if any)
-filtered_data = df  # Default to all data
+# Default to all data if "All (No Filter)" is selected
+filtered_data = df.copy()  # Keep raw data if no filtering
 
-if selected_school != "All":  # Apply school filter if a specific school is selected
-    filtered_data = df[df["School (if specific)"] == selected_school]
+if selected_school != "All (No Filter)":  # Apply school filter if not "All (No Filter)"
+    filtered_data = filtered_data[filtered_data["School (if specific)"] == selected_school]
 
-if selected_demographic and selected_demographic != "All":  # Apply demographic filter if selected
+if selected_demographic and selected_demographic != "All (No Filter)":  # Apply demographic filter if selected
     filtered_data = filtered_data[filtered_data["Demographic focus"] == selected_demographic]
+
 
 
 

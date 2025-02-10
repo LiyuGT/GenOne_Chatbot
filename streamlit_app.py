@@ -165,39 +165,38 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
         st.write("### Matching Scholarship Opportunities")
         st.write(response_content)
 
-import csv
-import io
 
-if response_content:
-    # Parse response into structured format (assuming response contains a table)
-    response_lines = response_content.split("\n")  # Split response by new lines
-    structured_data = []
 
-    for line in response_lines:
-        fields = [field.strip() for field in line.split("|")]  # Split by '|' and clean whitespace
-        if len(fields) > 1:  # Ensure it's not an empty line or header
-            structured_data.append(fields)
+    if response_content:
+        # Parse response into structured format (assuming response contains a table)
+        response_lines = response_content.split("\n")  # Split response by new lines
+        structured_data = []
 
-    # Convert structured data to DataFrame
-    if structured_data:
-        # Extract headers and data
-        headers = structured_data[0]  # Assuming first row contains headers
-        rows = structured_data[1:]  # The rest are actual data
+        for line in response_lines:
+            fields = [field.strip() for field in line.split("|")]  # Split by '|' and clean whitespace
+            if len(fields) > 1:  # Ensure it's not an empty line or header
+                structured_data.append(fields)
 
-        # Create DataFrame
-        response_df = pd.DataFrame(rows, columns=headers)
+        # Convert structured data to DataFrame
+        if structured_data:
+            # Extract headers and data
+            headers = structured_data[0]  # Assuming first row contains headers
+            rows = structured_data[1:]  # The rest are actual data
 
-        # Convert DataFrame to CSV format
-        csv_buffer = io.StringIO()
-        response_df.to_csv(csv_buffer, index=False)
+            # Create DataFrame
+            response_df = pd.DataFrame(rows, columns=headers)
 
-        # Convert to downloadable file
-        st.download_button(
-            label="📥 Download Chatbot Response as CSV",
-            data=csv_buffer.getvalue().encode("utf-8"),
-            file_name="chatbot_response.csv",
-            mime="text/csv",
-        )
+            # Convert DataFrame to CSV format
+            csv_buffer = io.StringIO()
+            response_df.to_csv(csv_buffer, index=False)
+
+            # Convert to downloadable file
+            st.download_button(
+                label="📥 Download Chatbot Response as CSV",
+                data=csv_buffer.getvalue().encode("utf-8"),
+                file_name="chatbot_response.csv",
+                mime="text/csv",
+            )
 
 
 

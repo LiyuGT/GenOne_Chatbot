@@ -126,8 +126,8 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
     token_count = num_tokens_from_string(filtered_data_string)
 
     # If tokens exceed 10,000, limit to 20 rows
-    if token_count > 10000:
-        filtered_data = filtered_data.head(15)
+    #if token_count > 10000:
+        #filtered_data = filtered_data.head(15)
 
     # Convert final filtered data to string for OpenAI
     filtered_data_string = filtered_data.to_string(index=False)
@@ -151,7 +151,7 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
 
     # Generate Chat Response using OpenAI
     response = client.chat.completions.create(
-        model="gpt-4",
+        model="gpt-4o-mini",
         messages=[
             {"role": "system", "content": "You are a helpful student assistant."},
             {"role": "user", "content": prompt},

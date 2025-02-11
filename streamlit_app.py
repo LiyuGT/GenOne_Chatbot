@@ -13,7 +13,7 @@ st.set_page_config(layout="wide")
 # Airtable credentials
 AIRTABLE_PERSONAL_TOKEN = os.getenv("AIRTABLE_PERSONAL_TOKEN")  # Store securely in environment variables
 BASE_ID = "appT6A7hwVgEpbGPR"
-TABLE_NAME = "Scholarships (LIST)-All Scholarship by due date"
+TABLE_NAME = "Scholarships (LIST)"
 
 # Function to estimate the number of tokens in a string
 def num_tokens_from_string(string: str) -> int:
@@ -53,7 +53,7 @@ def load_data():
     api = Api(AIRTABLE_PERSONAL_TOKEN)
     table = api.table(BASE_ID, TABLE_NAME)
     # Fetch records
-    records = table.all()
+    records = table.all(view="All Scholarships for Chatbot")  # Specify the correct view
 
     if not records:
         return pd.DataFrame()  # Return empty DataFrame if no data found

@@ -141,26 +141,20 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
     # Prepare the prompt for OpenAI API
     prompt = f"""
     ### Objective
-    The chatbot assists users in discovering relevant opportunities by querying the provided data. Responses must:
-    - Include **only relevant** opportunities based on the user query, ensuring a high degree of accuracy.
-    - Contain **all available details** for each matching opportunity, with no missing key information.
-    - Be displayed in a **clear, structured table format** as shown below.
-    - **Ensure completeness** by scanning the full dataset before generating responses.
+    The chatbot assists users in discovering relevant opportunities by querying the provided data. Responses should include:
+    - Relevant details about matching opportunities with all the fields and descriptions
+    - A user-friendly display, with tables for multiple matches.
+    - ### Table Format Example: | Scholarship Name | Amount | Requirements | Minimum GPA | Scholarship Website | Deadline Status | Deadline this year | School (if specific) | Demographic focus | Notes | 
+    - Clarity, friendliness, and professionalism.
+    - Make sure to look through the full data and provide all the matching responses.
+    - It is important to give ALL matching responses
 
-    ### Table Format Example:  
-    | Scholarship Name | Amount | Requirements | Minimum GPA | Scholarship Website | Deadline Status | Deadline this year | School (if specific) | Demographic focus | Notes |  
-
-    - Maintain clarity, friendliness, and professionalism.  
-    - Always **verify** that the extracted data aligns **precisely** with the query.  
-    - **Do not fabricate information**—only present details found in the dataset.  
-
-    ### Filtered Table Data  
+    ### Filtered Table Data
     {filtered_data_string}
 
-    ### User Query  
+    ### User Query
     {user_query}
     """
-
 
     # Generate Chat Response using OpenAI
     response = client.chat.completions.create(

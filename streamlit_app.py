@@ -162,7 +162,7 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
     {user_query}
     """
     # Determine which model to use
-    model_name = "gpt-4o-mini" if (selected_school == "All (No Filter)" and selected_demographic == "All (No Filter)") else "gpt-4"
+    model_name = "gpt-4o-mini" if (selected_school == "All (No Filter)" and selected_demographic == "All (No Filter)" OT selected_school == "All" and selected_demographic == "All") else "gpt-4"
 
     # Generate Chat Response using OpenAI
     response = client.chat.completions.create(

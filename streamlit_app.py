@@ -87,10 +87,6 @@ def load_data():
 
 df = load_data()
 
-if df.empty:
-    st.warning("⚠️ No data loaded from Airtable. Please check your API credentials or table view settings.")
-
-
 st.write("### Preview of Scholarships")
 
 # Define the fields to preview

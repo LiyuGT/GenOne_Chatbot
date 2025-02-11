@@ -58,14 +58,10 @@ def load_data():
     if not records:
         return pd.DataFrame()  # Return empty DataFrame if no data found
 
-    # Collect all possible columns dynamically
-    all_columns = set()
-    for record in records:
-        all_columns.update(record["fields"].keys())
-
-    # Convert Airtable records to DataFrame, ensuring all columns are included
-    df = pd.DataFrame([{col: record["fields"].get(col, None) for col in all_columns} for record in records])
-
+   
+     # Extract only the fields returned by Airtable (avoiding dynamically adding all possible fields)
+    df = pd.DataFrame([record["fields"] for record in records])
+    
     # Ensure "Scholarship Name" is the first column
     if "Scholarship Name" in df.columns:
         cols = ["Scholarship Name"] + [col for col in df.columns if col != "Scholarship Name"]

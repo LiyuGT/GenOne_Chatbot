@@ -170,7 +170,7 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
             {"role": "system", "content": "You are a helpful student assistant."},
             {"role": "user", "content": prompt},
         ],
-        temperature=0.0,
+        temperature=0.2,
     )
 
     response_content = response.choices[0].message.content if response and hasattr(response, "choices") else ""

@@ -53,7 +53,7 @@ def load_data():
     api = Api(AIRTABLE_PERSONAL_TOKEN)
     table = api.table(BASE_ID, TABLE_NAME)
     # Fetch records
-    records = table.all(view="All Scholarship by updates made")  # Specify the correct view
+    records = table.all(view="All Scholarships for Chatbot")  # Specify the correct view
 
     if not records:
         return pd.DataFrame()  # Return empty DataFrame if no data found
@@ -86,8 +86,18 @@ def load_data():
     return df
 
 df = load_data()
-st.write("### Preview of all Scholarships")
-st.dataframe(df)
+
+st.write("### Preview of Scholarships")
+
+# Define the fields to preview
+preview_columns = ["Scholarship Name", "Amount", "Minimum GPA", "Deadline this year", "Scholarship Website", "Status of Deadline", "Amount- details", "Renewable?", "Amount Category (per Year)", "Requirements and other Focus:", "Residency Requirements (US, Perm, DACA, All)", "Notes", "Demographic focus", "Region", "School Specific?", "School (if specific)"]
+
+# Ensure only existing columns are used (in case some are missing)
+preview_columns = [col for col in preview_columns if col in df.columns]
+
+# Display only the selected columns
+st.dataframe(df[preview_columns])
+
 
 # Extract unique school options from the column
 school_options = sorted(df["School (if specific)"].fillna("All").unique())  # Fill NaN with "All"

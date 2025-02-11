@@ -152,7 +152,8 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
     - Clarity, friendliness, and professionalism.
     - Make sure to look through the full data and provide all the matching responses.
     - It is important to give ALL matching responses
-    - But don't add a respone just for reference only if it does not match the user query needs
+    - But don't add a respone just for reference only if it does not match all filters of the user query needs.
+    - do not have a reponse saying "but were included for completeness", don't include if it doesn't match
 
     ### Filtered Table Data
     {filtered_data_string}

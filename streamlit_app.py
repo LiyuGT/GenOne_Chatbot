@@ -53,7 +53,7 @@ def load_data():
     api = Api(AIRTABLE_PERSONAL_TOKEN)
     table = api.table(BASE_ID, TABLE_NAME)
     # Fetch records
-    records = table.all(view="All Scholarships for Chatbot")  # Specify the correct view
+    records = table.all(view="All Scholarship alphabetical")  # Specify the correct view
 
     if not records:
         return pd.DataFrame()  # Return empty DataFrame if no data found
@@ -61,7 +61,7 @@ def load_data():
    
      # Extract only the fields returned by Airtable (avoiding dynamically adding all possible fields)
     df = pd.DataFrame([record["fields"] for record in records])
-    
+
     # Ensure "Scholarship Name" is the first column
     if "Scholarship Name" in df.columns:
         cols = ["Scholarship Name"] + [col for col in df.columns if col != "Scholarship Name"]

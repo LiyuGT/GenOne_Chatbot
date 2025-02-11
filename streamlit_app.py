@@ -53,7 +53,7 @@ def load_data():
     api = Api(AIRTABLE_PERSONAL_TOKEN)
     table = api.table(BASE_ID, TABLE_NAME)
     # Fetch records
-    records = table.all(view="All Scholarship alphabetical")  # Specify the correct view
+    records = table.all(view="All Scholarship by updates made")  # Specify the correct view
 
     if not records:
         return pd.DataFrame()  # Return empty DataFrame if no data found

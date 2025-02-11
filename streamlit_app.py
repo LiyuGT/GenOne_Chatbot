@@ -78,9 +78,9 @@ def load_data():
     # Clean and preprocess data
     df = df.applymap(lambda x: str(x).strip() if isinstance(x, str) else x)
     if "School (if specific)" in df.columns:
-     df["School (if specific)"] = df["School (if specific)"].fillna("All")
+     df["School (if specific)"] = df["School (if specific)"].fillna("All (School Unspecified)")
     else:
-     df["School (if specific)"] = "All"  # Create column with default value if missing
+     df["School (if specific)"] = "All (School Unspecified)"  # Create column with default value if missing
 
 
     # Ensure "Demographic" column exists
@@ -104,14 +104,14 @@ st.dataframe(df[preview_columns])
 
 
 # Extract unique school options from the column
-school_options = sorted(df["School (if specific)"].fillna("All").unique())  # Fill NaN with "All"
+school_options = sorted(df["School (if specific)"].fillna("All (School Unspecified)").unique())  # Fill NaN with "All"
 selected_school = st.selectbox(
     "Select the school related to your scholarship search (leave as 'All (No Filter)' for all):",
     ["All (No Filter)"] + school_options  # Add "All (No Filter)" option
 )
 
 # Add demographic dropdown only if "All (No Filter)" is not selected
-df["Demographic focus"] = df["Demographic focus"].fillna("All")  # Fill NaN with "All"
+df["Demographic focus"] = df["Demographic focus"].fillna("All (Demography Unspecified)")  # Fill NaN with "All"
 demographic_options = sorted(df["Demographic focus"].unique())
 selected_demographic = st.selectbox(
     "Select your demographic group (leave as 'All (No Filter)' for all):",
@@ -162,7 +162,7 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
     {user_query}
     """
     # Determine which model to use
-    model_name = "gpt-4o-mini" if (selected_school == "All (No Filter)" and selected_demographic == "All (No Filter)") or (selected_school == "All" and selected_demographic == "All") else "gpt-4"
+    model_name = "gpt-4o-mini" if (selected_school == "All (No Filter)" and selected_demographic == "All (No Filter)") or (selected_school == "All (School Unspecified)" and selected_demographic == "All (Demography Unspecified)") else "gpt-4"
 
 
     # Generate Chat Response using OpenAI

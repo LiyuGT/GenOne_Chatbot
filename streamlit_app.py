@@ -77,7 +77,11 @@ def load_data():
 
     # Clean and preprocess data
     df = df.applymap(lambda x: str(x).strip() if isinstance(x, str) else x)
-    df["School (if specific)"] = df["School (if specific)"].fillna("All")
+    if "School (if specific)" in df.columns:
+     df["School (if specific)"] = df["School (if specific)"].fillna("All")
+    else:
+     df["School (if specific)"] = "All"  # Create column with default value if missing
+
 
     # Ensure "Demographic" column exists
     if "Demographic focus" not in df.columns:

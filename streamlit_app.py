@@ -152,8 +152,7 @@ if user_query := st.chat_input("What kind of scholarship opportunities are you l
 
     - Maintain clarity, friendliness, and professionalism.  
     - Always **verify** that the extracted data aligns **precisely** with the query.  
-    - **Do not fabricate information**—only present details found in the dataset. 
-    - when the result is matching, put the top matching on top 
+    - **Do not fabricate information**—only present details found in the dataset.  
 
     ### Filtered Table Data  
     {filtered_data_string}
